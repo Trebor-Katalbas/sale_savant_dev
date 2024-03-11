@@ -13,7 +13,7 @@ const StatBox = ({ title, value, increase, description, date, width, bg }) => {
       flexDirection="column"
       justifyContent="space-between"
       width={width}
-      sx={{ background: [bg], padding: "1em", borderRadius: "5px", height: {xs:"15vh", sm:"15vh", md:"20vh", lg:"20vh", xl:"25vh"} }}
+      sx={{ background: [bg], padding: "1em", borderRadius: "5px", height: {xs:"15vh", sm:"15vh", md:"35vh", lg:"35vh", xl:"25vh"} }}
     >
       <FlexBetween>
         <Typography

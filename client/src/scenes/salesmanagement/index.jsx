@@ -5,6 +5,7 @@ import {
   DialogActions,
   DialogContent,
   DialogTitle,
+  Grid,
   TextField,
   Toolbar,
   Tooltip,
@@ -23,11 +24,60 @@ const SalesManagement = () => {
   const navigate = useNavigate();
   const isDesktop = useMediaQuery(theme.breakpoints.up("md"));
   const [totalSale, setTotalSale] = useState([]);
+  const [cashDialogOpen, setCashDialogOpen] = useState(false);
   const [startCash, setStartCash] = useState(() => {
     const storedStartCash = localStorage.getItem("startCash");
     return storedStartCash ? parseFloat(storedStartCash) : 0;
   });
-  const [cashDialogOpen, setCashDialogOpen] = useState(false);
+  const [coinQuantities, setCoinQuantities] = useState(() => {
+    const storedCoinQuantities = JSON.parse(
+      localStorage.getItem("coinQuantities")
+    );
+    return (
+      storedCoinQuantities || {
+        0.05: 0,
+        0.1: 0,
+        0.25: 0,
+        1: 0,
+        5: 0,
+        10: 0,
+        20: 0,
+        50: 0,
+        100: 0,
+        200: 0,
+        500: 0,
+        1000: 0,
+      }
+    );
+  });
+
+  useEffect(() => {
+    localStorage.setItem("startCash", startCash);
+    localStorage.setItem("coinQuantities", JSON.stringify(coinQuantities));
+  }, [startCash, coinQuantities]);
+
+  const handleInputChange = (denomination, event) => {
+    const value = event.target.value;
+    setCoinQuantities((prevState) => ({
+      ...prevState,
+      [denomination]: value === "" ? "" : parseInt(value),
+    }));
+  };
+
+  const calculateTotal = () => {
+    let total = startCash;
+    Object.entries(coinQuantities).forEach(([denomination, quantity]) => {
+      total += denomination * quantity;
+    });
+    return total;
+  };
+
+  const handleCashDialogConfirm = () => {
+    const totalCash = calculateTotal();
+    setStartCash(totalCash);
+    setCashDialogOpen(false);
+    console.log("Start cash and coin quantities:", startCash, coinQuantities);
+  };
 
   const handleClickLink = (link) => navigate(link);
 
@@ -59,7 +109,7 @@ const SalesManagement = () => {
 
     const intervalId = setInterval(() => {
       fetchTotalSaleStat();
-    }, 60000); 
+    }, 60000);
 
     return () => clearInterval(intervalId);
   }, []);
@@ -74,14 +124,9 @@ const SalesManagement = () => {
 
   const handleClearCash = () => {
     setStartCash(0);
-    setCashDialogOpen(false);
-  };
-
-  const handleStartCash = (event) => {
-    setStartCash(parseFloat(event.target.value));
-  };
-
-  const handleCashDialogConfirm = () => {
+    setCoinQuantities(
+      Object.fromEntries(Object.keys(coinQuantities).map((key) => [key, 0]))
+    );
     setCashDialogOpen(false);
   };
 
@@ -159,15 +204,15 @@ const SalesManagement = () => {
           marginBottom="1em"
           gap="2em"
           sx={{
-            width:"100%",
-            justifyContent:"normal",
+            width: "100%",
+            justifyContent: "normal",
             flexDirection: { xs: "column", sm: "row", md: "row", lg: "row" },
           }}
         >
           <Box
             borderRadius="10px"
             height="250px"
-            width={{xs:"90vw", sm:"60%", md:"60%", lg:"60%", }}
+            width={{ xs: "90vw", sm: "60%", md: "60%", lg: "60%" }}
             sx={{ background: theme.palette.secondary[700] }}
           >
             <LineSalesChart />
@@ -177,7 +222,7 @@ const SalesManagement = () => {
             value={`Php ${totalSale.totalSaleAmount}`}
             increase={totalSale.incomePercentage}
             date={totalSale.totalSaleDate}
-            width={{ xs: "100%", sm: "40%", md: "40%", lg: "40%", xl:"40%" }}
+            width={{ xs: "100%", sm: "40%", md: "40%", lg: "40%", xl: "40%" }}
             bg={theme.palette.primary[700]}
           />
         </FlexBetween>
@@ -262,21 +307,35 @@ const SalesManagement = () => {
       </Box>
 
       <Dialog open={cashDialogOpen} onClose={handleCashDialogClose}>
-        <DialogTitle>
-          <Typography>Starting Cash</Typography>
+        <DialogTitle sx={{ background: theme.palette.primary[700] }}>
+          Starting Cash
         </DialogTitle>
-        <DialogContent sx={{ margin: "1em 0" }}>
-          <TextField
-            color="secondary"
-            label="Enter Amount"
-            value={startCash}
-            type="number"
-            onChange={handleStartCash}
-            fullWidth
-            margin="normal"
-          />
+        <DialogContent sx={{ background: theme.palette.primary[700] }}>
+          <Typography variant="subtitle1" marginBottom="1em">
+            Enter Coins/Bills Quantity:
+          </Typography>
+          <Grid container spacing={2}>
+            {Object.entries(coinQuantities).map(([denomination, quantity]) => (
+              <Grid item xs={6} sm={4} md={3} key={denomination}>
+                <TextField
+                  label={`${denomination} Peso(s)`}
+                  type="number"
+                  value={quantity}
+                  onChange={(e) => handleInputChange(denomination, e)}
+                />
+              </Grid>
+            ))}
+          </Grid>
+          <Box mb={2} marginTop="2em">
+            <TextField
+              label="Total Starting Cash"
+              type="number"
+              value={calculateTotal().toFixed(2)}
+              fullWidth
+            />
+          </Box>
         </DialogContent>
-        <DialogActions>
+        <DialogActions sx={{ background: theme.palette.primary[700] }}>
           <Button onClick={handleClearCash} color="error" variant="outlined">
             Clear
           </Button>

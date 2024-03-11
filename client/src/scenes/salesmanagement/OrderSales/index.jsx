@@ -248,7 +248,7 @@ const OrderSales = () => {
               {today}, Today
             </Typography>
             <Box
-              height="28vh"
+              height="270px"
               sx={{
                 "& .MuiDataGrid-root": {
                   border: "none",
@@ -294,7 +294,7 @@ const OrderSales = () => {
               {yesterday}, Yesterday
             </Typography>
             <Box
-              height="28vh"
+              height="270px"
               sx={{
                 "& .MuiDataGrid-root": {
                   border: "none",

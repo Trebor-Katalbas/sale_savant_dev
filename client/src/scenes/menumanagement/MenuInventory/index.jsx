@@ -33,9 +33,7 @@ const MenuInventory = () => {
 
   const fetchMenuInventory = async () => {
     try {
-      const response = await fetch(
-        `${baseUrl}menumanagement/menuInventory`
-      );
+      const response = await fetch(`${baseUrl}menumanagement/menuInventory`);
       if (response.ok) {
         const data = await response.json();
         const menuInventoryWithId = data.map((item, index) => ({
@@ -75,12 +73,9 @@ const MenuInventory = () => {
 
   const handleCleanInventory = async () => {
     try {
-      const response = await fetch(
-        `${baseUrl}menumanagement/cleanInventory`,
-        {
-          method: "DELETE",
-        }
-      );
+      const response = await fetch(`${baseUrl}menumanagement/cleanInventory`, {
+        method: "DELETE",
+      });
 
       if (response.ok) {
         console.log("Inventory cleaned successfully");
@@ -226,7 +221,7 @@ const MenuInventory = () => {
         <Header title={"Menu Inventory"} link={"/menu management"} />
       </Box>
 
-      <Box>
+      <Box width="100%">
         <Toolbar sx={{ justifyContent: "space-between", flexWrap: "wrap" }}>
           <FlexBetween>
             <Link
@@ -281,50 +276,49 @@ const MenuInventory = () => {
             </Container>
           </FlexBetween>
         </Toolbar>
-      </Box>
 
-      <Box
-        m="1.5rem 2.5rem"
-        height="67vh"
-        width="82vw"
-        sx={{
-          "& .MuiDataGrid-root": {
-            border: "none",
-          },
-          "& .MuiDataGrid-cell": {
-            borderBottom: "none",
-          },
-          "& .MuiDataGrid-columnHeaders": {
-            backgroundColor: theme.palette.secondary[700],
-            color: theme.palette.secondary[100],
-            borderColor: theme.palette.secondary[100],
-          },
-          "& .MuiDataGrid-virtualScroller": {
-            backgroundColor: theme.palette.secondary[700],
-          },
-          "& .MuiDataGrid-footerContainer": {
-            backgroundColor: theme.palette.secondary[700],
-            color: theme.palette.secondary[100],
-            borderColor: theme.palette.secondary[100],
-          },
-          "& .MuiDataGrid-toolbarContainer .MuiButton-text": {
-            color: `${theme.palette.secondary[200]} !important`,
-          },
-        }}
-      >
-        <DataGrid
-          rows={filteredRows}
-          columns={columns}
-          initialState={{
-            pagination: {
-              paginationModel: {
-                pageSize: 10,
-              },
+        <Box
+          m="1.5rem 2.5rem"
+          height="67vh"
+          sx={{
+            "& .MuiDataGrid-root": {
+              border: "none",
+            },
+            "& .MuiDataGrid-cell": {
+              borderBottom: "none",
+            },
+            "& .MuiDataGrid-columnHeaders": {
+              backgroundColor: theme.palette.secondary[700],
+              color: theme.palette.secondary[100],
+              borderColor: theme.palette.secondary[100],
+            },
+            "& .MuiDataGrid-virtualScroller": {
+              backgroundColor: theme.palette.secondary[700],
+            },
+            "& .MuiDataGrid-footerContainer": {
+              backgroundColor: theme.palette.secondary[700],
+              color: theme.palette.secondary[100],
+              borderColor: theme.palette.secondary[100],
+            },
+            "& .MuiDataGrid-toolbarContainer .MuiButton-text": {
+              color: `${theme.palette.secondary[200]} !important`,
             },
           }}
-          pageSizeOptions={[10]}
-          disableRowSelectionOnClick
-        />
+        >
+          <DataGrid
+            rows={filteredRows}
+            columns={columns}
+            initialState={{
+              pagination: {
+                paginationModel: {
+                  pageSize: 10,
+                },
+              },
+            }}
+            pageSizeOptions={[10]}
+            disableRowSelectionOnClick
+          />
+        </Box>
       </Box>
 
       <Dialog open={deleteDialogOpen} onClose={handleCancelDelete}>
