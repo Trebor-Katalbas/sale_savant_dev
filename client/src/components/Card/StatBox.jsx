@@ -4,7 +4,7 @@ import { FlexBetween } from "components";
 import TrendingUpIcon from "@mui/icons-material/TrendingUp";
 import TrendingDownIcon from "@mui/icons-material/TrendingDown";
 
-const StatBox = ({ title, value, increase, description, date, width, bg }) => {
+const StatBox = ({ title, value, increase, description, date, width, height, bg }) => {
   const theme = useTheme();
 
   return (
@@ -13,7 +13,8 @@ const StatBox = ({ title, value, increase, description, date, width, bg }) => {
       flexDirection="column"
       justifyContent="space-between"
       width={width}
-      sx={{ background: [bg], padding: "1em", borderRadius: "5px", height: {xs:"15vh", sm:"15vh", md:"35vh", lg:"35vh", xl:"25vh"} }}
+      height={height}
+      sx={{ background: [bg], padding: "1em", borderRadius: "5px", }}
     >
       <FlexBetween>
         <Typography
@@ -25,7 +26,7 @@ const StatBox = ({ title, value, increase, description, date, width, bg }) => {
       </FlexBetween>
 
       <Typography
-        variant="h2"
+        variant="h3"
         fontWeight="600"
         sx={{ textAlign: "center", padding: "0.5em 0" }}
       >

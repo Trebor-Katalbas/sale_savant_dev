@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
 
-const ReceiptSchema = new mongoose.Schema(
+const RefundSchema = new mongoose.Schema(
   {
     items: [
       {
@@ -27,33 +27,17 @@ const ReceiptSchema = new mongoose.Schema(
         },
       },
     ],
-    promoUsed: [
-      {
-        promoName: {
-          type: String,
-        },
-        promoUsage: {
-          type: Number,
-        },
-      },
-    ],
-    tableNo: {
-      type: String,
-      required: true,
-    },
     orderNo: {
       type: Number,
       required: true,
     },
-    orderType: {
+    paymentType: {
       type: String,
       required: true,
     },
-    paymentType: {
-      type: String,
-    },
     paymentCode: {
       type: String,
+      required: true,
     },
     subTotal: {
       type: Number,
@@ -67,13 +51,17 @@ const ReceiptSchema = new mongoose.Schema(
       type: Number,
       required: true,
     },
-    status: {
-      type: String,
+    totalRefund: {
+      type: Number,
+      required: true,
+    },
+    newAmount: {
+      type: Number,
       required: true,
     },
   },
   { timestamps: true }
 );
 
-const Receipt = mongoose.model("Receipt", ReceiptSchema);
-export default Receipt;
+const Refund = mongoose.model("Refund", RefundSchema);
+export default Refund;

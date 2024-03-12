@@ -404,7 +404,7 @@ const OrderSales = () => {
       <Dialog open={resetDialogOpen} onClose={handleCancelReset}>
         <DialogTitle>Delete Confirmation</DialogTitle>
         <DialogContent>
-          Are you sure you want to reset today's sale?
+          Are you sure you want to reset all sales?
           <span style={{ color: "#DC3545" }}>
             {" "}
             (This action cannot be undone)

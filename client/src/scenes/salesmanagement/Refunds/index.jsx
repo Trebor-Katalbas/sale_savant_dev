@@ -20,33 +20,30 @@ import { baseUrl } from "state/api";
 
 const RefundSales = () => {
   const theme = useTheme();
-  const [supplyRecord, setSupplyRecord] = useState([]);
+  const [refunds, setRefunds] = useState([]);
   const [selectedItemId, setSelectedItemId] = useState(null);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [resetDialogOpen, setResetDialogOpen] = useState(false);
 
-  const fetchSupplyRecord = async () => {
+  const fetchRefundData = async () => {
     try {
-      const response = await fetch(
-        `${baseUrl}supply-management/get-supplyRecord`
-      );
+      const response = await fetch(`${baseUrl}cashier/get-refunds`);
       if (response.ok) {
         const data = await response.json();
-        const supplyRecordWithId = data.map((item, index) => ({
+        const refundsWithId = data.map((item, index) => ({
           ...item,
           id: index + 1,
         }));
-        setSupplyRecord(supplyRecordWithId);
+        setRefunds(refundsWithId);
       } else {
-        console.error("Failed to fetch supply record:", response.statusText);
+        console.error("Failed to fetch refund data:", response.statusText);
       }
     } catch (error) {
       console.error("An error occurred during the fetch:", error);
     }
   };
-
   useEffect(() => {
-    fetchSupplyRecord();
+    fetchRefundData();
   }, []);
 
   const handleReset = () => {
@@ -77,10 +74,10 @@ const RefundSales = () => {
       );
 
       if (response.ok) {
-        console.log(`All records deleted successfully`);
-        fetchSupplyRecord();
+        console.log(`All refunds deleted successfully`);
+        fetchRefundData();
       } else {
-        console.error("Failed to delete supply record:", response.statusText);
+        console.error("Failed to delete refunds:", response.statusText);
       }
     } catch (error) {
       console.error("An error occurred during the delete:", error);
@@ -101,11 +98,11 @@ const RefundSales = () => {
 
       if (response.ok) {
         console.log(
-          `Supply record with ID ${selectedItemId} deleted successfully`
+          `Refund with ID ${selectedItemId} deleted successfully`
         );
-        fetchSupplyRecord();
+        fetchRefundData();
       } else {
-        console.error("Failed to delete supply record:", response.statusText);
+        console.error("Failed to delete Refund:", response.statusText);
       }
     } catch (error) {
       console.error("An error occurred during the delete:", error);
@@ -115,151 +112,98 @@ const RefundSales = () => {
     }
   };
 
-  const sortedRecords = supplyRecord.slice().sort((a, b) => {
+  const sortedRefunds = refunds.slice().sort((a, b) => {
     return new Date(b.createdAt) - new Date(a.createdAt);
   });
 
   const today = new Date().toLocaleDateString();
   const yesterday = new Date(Date.now() - 864e5).toLocaleDateString();
 
-  const todayData = sortedRecords.filter(
+  const todayData = sortedRefunds.filter(
     (item) => new Date(item.createdAt).toLocaleDateString() === today
   );
-  const yesterdayData = sortedRecords.filter(
+  const yesterdayData = sortedRefunds.filter(
     (item) => new Date(item.createdAt).toLocaleDateString() === yesterday
   );
 
-  const getStatus = (totalPaid, totalCost) => {
-    if (totalPaid === 0) {
-      return { text: "- Unpaid -", color: "#B03021", font: "#fff" };
-    } else if (totalPaid !== 0 && totalPaid < totalCost) {
-      return { text: "Partially Paid", color: "#E8F4B5", font: "#000" };
-    } else if (totalPaid === totalCost) {
-      return { text: "-- Paid --", color: "#00DB16", font: "#000" };
-    } else {
-      return { text: "Unknown", color: "#000", font: "#fff" };
-    }
-  };
-
   const shortColumns = [
     {
-      field: "deliveryDate",
-      headerName: "Delivery Date",
-      width: 100,
-      valueFormatter: (params) => {
-        const date = new Date(params.value);
-        return date.toLocaleDateString("en-US", {
-          year: "numeric",
-          month: "2-digit",
-          day: "2-digit",
-        });
+      field: "createdAt",
+      headerName: "Date",
+      width: 80,
+      renderCell: (params) => {
+        const date = new Date(params.row.createdAt);
+        const formattedDate = `${(date.getMonth() + 1)
+          .toString()
+          .padStart(2, "0")}/${date
+          .getDate()
+          .toString()
+          .padStart(2, "0")}/${date.getFullYear()}`;
+        return <div>{formattedDate}</div>;
       },
     },
+    { field: "orderNo", headerName: "Order No.", width: 80 },
+    { field: "paymentCode", headerName: "Payment Code", width: 100 },
     {
-      field: "supplierName",
-      headerName: "Supplier Name",
-      width: 140,
-      valueGetter: (params) => params.row.supplier[0].supplierName,
-    },
-    {
-      field: "divider1",
-      headerName: "",
-      width: 20,
-      sortable: false,
-      renderCell: () => (
-        <Divider orientation="vertical" sx={{ marginLeft: "2em" }} />
-      ),
-    },
-    { field: "itemName", headerName: "Item Name", width: 140 },
-    { field: "quantity", headerName: "Quantity", width: 70 },
-    { field: "totalCost", headerName: "Total Cost (Php)", width: 120 },
-    { field: "totalPaid", headerName: "Amount Paid (Php)", width: 140 },
+        field: "items",
+        headerName: "Item Refunded",
+        width: 200,
+        renderCell: (params) => {
+          const { items } = params.row;
+          return (
+            <div>
+              {items.map((item) => (
+                <div key={item.menuItem}>
+                  {item.quantity} - {item.menuItem}
+                </div>
+              ))}
+            </div>
+          );
+        },
+      },
+      { field: "subTotal", headerName: "Sub Total (Php)", width: 120 },
+      { field: "totalRefund", headerName: "Amount Refunded (Php)", width: 160 },
   ];
 
   const columns = [
     {
-      field: "deliveryDate",
-      headerName: "Delivery Date",
-      width: 140,
-      valueFormatter: (params) => {
-        const date = new Date(params.value);
-        return date.toLocaleDateString("en-US", {
-          year: "numeric",
-          month: "2-digit",
-          day: "2-digit",
-        });
+        field: "createdAt",
+        headerName: "Date",
+        width: 120,
+        renderCell: (params) => {
+          const date = new Date(params.row.createdAt);
+          const formattedDate = `${(date.getMonth() + 1)
+            .toString()
+            .padStart(2, "0")}/${date
+            .getDate()
+            .toString()
+            .padStart(2, "0")}/${date.getFullYear()}`;
+          return <div>{formattedDate}</div>;
+        },
       },
-    },
-    {
-      field: "supplierName",
-      headerName: "Supplier Name",
-      width: 200,
-      valueGetter: (params) => params.row.supplier[0].supplierName,
-    },
-    {
-      field: "contactPerson",
-      headerName: "Contact Person",
-      width: 200,
-      valueGetter: (params) => params.row.supplier[0].contactPerson,
-    },
-    {
-      field: "contactNo",
-      headerName: "Contact #",
-      width: 120,
-      valueGetter: (params) => params.row.supplier[0].contactNo,
-    },
-    {
-      field: "divider1",
-      headerName: "",
-      width: 20,
-      sortable: false,
-      renderCell: () => (
-        <Divider orientation="vertical" sx={{ marginLeft: "2em" }} />
-      ),
-    },
-    {
-      field: "category",
-      headerName: "Category",
-      width: 160,
-      valueGetter: (params) => params.row.supplier[0].category,
-    },
-    { field: "itemName", headerName: "Item Name", width: 160 },
-    { field: "quantity", headerName: "Quantity", width: 100 },
-    { field: "totalCost", headerName: "Total Cost (Php)", width: 120 },
-    {
-      field: "divider2",
-      headerName: "",
-      width: 20,
-      sortable: false,
-      renderCell: () => (
-        <Divider orientation="vertical" sx={{ marginLeft: "2em" }} />
-      ),
-    },
-    {
-      field: "status",
-      headerName: "Status",
-      width: 120,
-      valueGetter: (params) => {
-        const totalPaid = params.row.totalPaid;
-        const totalCost = params.row.totalCost;
-        return getStatus(totalPaid, totalCost);
+      { field: "orderNo", headerName: "Order No.", width: 100 },
+      { field: "paymentType", headerName: "Payment Method", width: 140 },
+      { field: "paymentCode", headerName: "Payment Code", width: 160 },
+      {
+        field: "items",
+        headerName: "Item Refunded",
+        width: 200,
+        renderCell: (params) => {
+          const { items } = params.row;
+          return (
+            <div>
+              {items.map((item) => (
+                <div key={item.menuItem}>
+                  {item.quantity} - {item.menuItem}
+                </div>
+              ))}
+            </div>
+          );
+        },
       },
-      renderCell: (params) => {
-        const status = params.value;
-        return (
-          <div
-            style={{
-              backgroundColor: status.color,
-              padding: "0.5em 0.8em",
-              borderRadius: "5px",
-              color: status.font,
-            }}
-          >
-            {status.text}
-          </div>
-        );
-      },
-    },
+      { field: "subTotal", headerName: "Sub Total (Php)", width: 160 },
+      { field: "totalRefund", headerName: "Amount Refunded (Php)", width: 180 },
+      { field: "newAmount", headerName: "New Amount (Php)", width: 160 },
     {
       field: "action",
       headerName: "Action",
@@ -280,7 +224,7 @@ const RefundSales = () => {
   ];
   return (
     <>
-      <Header title={"Expenses"} link={"/sales management"} />
+      <Header title={"Refunds"} link={"/sales management"} />
 
       <Box margin="1em 2em">
         <Toolbar
@@ -298,7 +242,7 @@ const RefundSales = () => {
             size="medium"
             onClick={handleReset}
           >
-            Reset Expenses Records
+            Reset Refund Records
           </Button>
 
           <FlexBetween
@@ -314,12 +258,7 @@ const RefundSales = () => {
           </FlexBetween>
         </Toolbar>
 
-        <Box
-          display="flex"
-          justifyContent="space-between"
-          gap="1em"
-          width="100%"
-        >
+        <Box display="flex" justifyContent="space-between" gap="1em" width="100%">
           <Box width="100%">
             <Typography variant="h3" marginBottom="0.5em">
               {today}, Today
@@ -448,7 +387,7 @@ const RefundSales = () => {
           }}
         >
           <DataGrid
-            rows={supplyRecord}
+            rows={refunds}
             columns={columns}
             initialState={{
               pagination: {

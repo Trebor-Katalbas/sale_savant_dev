@@ -109,6 +109,8 @@ const CheckoutList = () => {
                 tableNo={selectedOrder.tableNo}
                 orderNo={selectedOrder.orderNo}
                 orderType={selectedOrder.orderType}
+                paymentType={selectedOrder.paymentType}
+                paymentCode={selectedOrder.paymentCode}
                 subtotal={selectedOrder.subTotal}
                 amountDiscounted={selectedOrder.amountDiscounted}
                 totalAmount={selectedOrder.totalAmount}
@@ -205,7 +207,7 @@ const CheckoutList = () => {
                   Checkout
                 </Button>
               </Badge>
-              <Button variant="contained">Refunds</Button>
+              <Button variant="contained" onClick={() => handleButtonClick("/refunds")}>Refunds</Button>
             </div>
 
             <Box sx={{ display: "flex", gap: "2em" }}>

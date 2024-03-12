@@ -51,7 +51,9 @@ function App() {
               <Route path="/sales management" element={<scenes.SalesManagement />} />
               <Route path="/sales management/order-sales" element={<scenes.OrderSales />} />
               <Route path="/sales management/expenses" element={<scenes.Expenses />} />
+              <Route path="/sales management/refund-records" element={<scenes.RefundRecords />} />
               {/* Modules */}
+              <Route path={`/add eod/start-cash/:id`}element={<scenes.AddEOD />} />
 
               {/* Account Management Routes */}
               <Route path="/account management" element={<scenes.AccountManagement/>} />
@@ -83,6 +85,9 @@ function App() {
               {/* Checkout Order */}
               <Route path="/checkout-list" element={<pages.CheckoutList />} />
               <Route path={`/checkout-order/:id`} element={<pages.ReceiptSummary />} />
+
+              {/* Refunds */}
+              <Route path="/refunds" element={<pages.Refunds />} />
 
             </Route>
             

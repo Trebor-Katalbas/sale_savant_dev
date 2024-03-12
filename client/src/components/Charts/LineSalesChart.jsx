@@ -2,26 +2,12 @@ import { useTheme } from "@mui/material";
 import { ResponsiveLine } from "@nivo/line";
 import React from "react";
 
-const LineSalesChart = () => {
+const LineSalesChart = ({ data }) => {
   const theme = useTheme();
-  const data = [
-    {
-      id: "Total Sales",
-      data: [
-        { x: "2023-11-01", y: 1000 },
-        { x: "2023-11-02", y: 1500 },
-        { x: "2023-11-03", y: 1200 },
-        { x: "2023-11-04", y: 1800 },
-        { x: "2023-11-05", y: 2000 },
-        { x: "2023-11-08", y: 5000 },
-        { x: "2023-11-10", y: 3000 },
-      ],
-    },
-  ];
 
   return (
     <ResponsiveLine
-      data={data}
+      data={[{ id: "Total Sales", data }]}
       margin={{ top: 60, right: 30, bottom: 50, left: 70 }}
       theme={{
         grid: {

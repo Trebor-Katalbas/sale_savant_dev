@@ -43,6 +43,8 @@ const ReceiptSummary = () => {
     navigate(link);
   };
 
+  const change = orderSale.amountPaid - orderSale.totalAmount
+
   return (
     <>
       <Box display="flex" height="93vh">
@@ -208,7 +210,7 @@ const ReceiptSummary = () => {
                 <FlexBetween>
                   <Typography sx={{ fontWeight: "600" }}>Change</Typography>
                   <Typography sx={{ fontWeight: "600" }}>
-                    Php {orderSale.amountPaid - orderSale.totalAmount}
+                    Php {change.toFixed(2)}
                   </Typography>
                 </FlexBetween>
               </div>

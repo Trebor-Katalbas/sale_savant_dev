@@ -25,6 +25,8 @@ export {default as EditSupplier} from './supplymanagement/EditModules/EditSuppli
 export {default as SalesManagement} from './salesmanagement/index.jsx'
 export {default as OrderSales} from './salesmanagement/OrderSales/index.jsx'
 export {default as Expenses} from './salesmanagement/Expenses/index.jsx'
+export {default as RefundRecords} from './salesmanagement/Refunds/index.jsx'
+export {default as AddEOD} from './salesmanagement/addEOD.jsx'
 
 // exports for Account Management
 export {default as AccountManagement} from './accountmanagement/index.jsx'

@@ -4,6 +4,7 @@ import Table from "../models/Table.js";
 import MenuInventory from "../models/MenuInventory.js";
 import MenuPromo from "../models/MenuPromo.js";
 import OrderSales from "../models/OrderSales.js";
+import Refund from "../models/Refunds.js"
 
 // Add
 export const createReceipt = async (req, res) => {
@@ -118,6 +119,38 @@ export const AddOrderSale = async (req, res) => {
     res.status(500).json({ error: "Internal Server Error" });
   }
 };
+export const addRefund = async (req, res) => {
+  try {
+    const {
+      items,
+      orderNo,
+      paymentType,
+      paymentCode,
+      subTotal,
+      amountDiscounted,
+      totalAmount,
+      totalRefund,
+      newAmount,
+    } = req.body;
+
+    const refund = new Refund({
+      items,
+      orderNo,
+      paymentType,
+      paymentCode,
+      subTotal,
+      amountDiscounted,
+      totalAmount,
+      totalRefund,
+      newAmount,
+    });
+
+    const savedRefund = await refund.save();
+    res.status(201).json(savedRefund);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
 export const AddTable = async (req, res) => {
   try {
     const { tableNo, pax, status } = req.body;
@@ -165,6 +198,17 @@ export const getOrderSale = async (req, res) => {
     res.status(404).json({ message: err.message });
   }
 };
+export const getRefund = async (req, res) => {
+  try {
+    const refund = await Refund.find();
+    if (!refund) {
+      return res.status(404).json({ message: "refund not found" });
+    }
+    res.status(200).json(refund);
+  } catch (err) {
+    res.status(404).json({ message: err.message });
+  }
+};
 export const getOrderSaleNo = async (req, res) => {
   try {
     const { id } = req.params;
@@ -203,11 +247,11 @@ export const updateTableStatus = async (req, res) => {
 export const updateReceiptStatus = async (req, res) => {
   try {
     const { id } = req.params; 
-    const { status } = req.body; 
+    const { status, paymentType, paymentCode, items, totalAmount, subTotal, amountDiscounted } = req.body; 
 
     const updatedReceipt = await Receipt.findByIdAndUpdate(
       id,
-      { status },
+      { paymentType, paymentCode, status, items, totalAmount, subTotal, amountDiscounted },
       { new: true }
     );
 

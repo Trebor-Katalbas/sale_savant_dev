@@ -79,7 +79,7 @@ const TakeOrder = () => {
         navigate("/checkout-list");
         break;
       case "Refunds":
-        navigate("/refund-orders");
+        navigate("/refunds");
         break;
       case "Modify Table":
         navigate("/modify-table");

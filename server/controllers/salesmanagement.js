@@ -1,4 +1,5 @@
 import OrderSales from "../models/OrderSales.js";
+import Refund from "../models/Refunds.js";
 
 // Get
 export const getOrderSale = async (req, res) => {
@@ -15,6 +16,7 @@ export const getOrderSale = async (req, res) => {
 export const getTotalSaleStats = async (req, res) => {
   try {
     const orderSales = await OrderSales.find();
+    const refund = await Refund.find();
 
     const currentDate = new Date();
     const currentDaySales = orderSales.filter((sale) => {
@@ -22,10 +24,22 @@ export const getTotalSaleStats = async (req, res) => {
       return saleDate.toDateString() === currentDate.toDateString();
     });
 
-    const totalSaleAmount = currentDaySales.reduce(
+    const totalSaleAmountNoRefund = currentDaySales.reduce(
       (total, sale) => total + sale.totalAmount,
       0
     );
+
+    const currentDayRefund = refund.filter((sale) => {
+      const refundDate = new Date(sale.createdAt);
+      return refundDate.toDateString() === currentDate.toDateString();
+    });
+
+    const totalRefunds = currentDayRefund.reduce(
+      (total, refund) => total + refund.totalRefund,
+      0
+    );
+
+    const totalSaleAmount = totalSaleAmountNoRefund - totalRefunds;
 
     const yesterday = new Date(currentDate);
     yesterday.setDate(currentDate.getDate() - 1);

@@ -14,6 +14,7 @@ import {
   useTheme,
 } from "@mui/material";
 import { DataGrid } from "@mui/x-data-grid";
+import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
 import { FlexBetween, Header, LineSalesChart, StatBox } from "components";
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -24,6 +25,9 @@ const SalesManagement = () => {
   const navigate = useNavigate();
   const isDesktop = useMediaQuery(theme.breakpoints.up("md"));
   const [totalSale, setTotalSale] = useState([]);
+  const [eod, setEOD] = useState([]);
+  const [selectedItemId, setSelectedItemId] = useState(null);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [cashDialogOpen, setCashDialogOpen] = useState(false);
   const [startCash, setStartCash] = useState(() => {
     const storedStartCash = localStorage.getItem("startCash");
@@ -66,9 +70,11 @@ const SalesManagement = () => {
 
   const calculateTotal = () => {
     let total = startCash;
-    Object.entries(coinQuantities).forEach(([denomination, quantity]) => {
-      total += denomination * quantity;
-    });
+    if (total === 0) {
+      Object.entries(coinQuantities).forEach(([denomination, quantity]) => {
+        total += denomination * quantity;
+      });
+    }
     return total;
   };
 
@@ -84,6 +90,29 @@ const SalesManagement = () => {
   useEffect(() => {
     localStorage.setItem("startCash", startCash);
   }, [startCash]);
+
+  console.log(eod);
+
+  const fetchEOD = async () => {
+    try {
+      const response = await fetch(`${baseUrl}home/get-eod`);
+      if (response.ok) {
+        const data = await response.json();
+        const eodWithId = data.map((item, index) => ({
+          ...item,
+          id: index + 1,
+        }));
+        setEOD(eodWithId);
+      } else {
+        console.error("Failed to fetch eod data:", response.statusText);
+      }
+    } catch (error) {
+      console.error("An error occurred during the fetch:", error);
+    }
+  };
+  useEffect(() => {
+    fetchEOD();
+  }, []);
 
   useEffect(() => {
     const fetchTotalSaleStat = async () => {
@@ -130,13 +159,54 @@ const SalesManagement = () => {
     setCashDialogOpen(false);
   };
 
+  const handleDelete = (_id) => {
+    setDeleteDialogOpen(true);
+    setSelectedItemId(_id);
+  };
+
+  const handleConfirmDelete = async () => {
+    try {
+      const response = await fetch(
+        `${baseUrl}home/delete-eod/${selectedItemId}`,
+        {
+          method: "DELETE",
+        }
+      );
+
+      if (response.ok) {
+        console.log(`EOD with ID ${selectedItemId} deleted successfully`);
+        fetchEOD();
+      } else {
+        console.error("Failed to delete eod:", response.statusText);
+      }
+    } catch (error) {
+      console.error("An error occurred during the delete:", error);
+    } finally {
+      setDeleteDialogOpen(false);
+      setSelectedItemId(null);
+    }
+  };
+
+  const handleCancelDelete = () => {
+    setDeleteDialogOpen(false);
+    setSelectedItemId(null);
+  };
+
+  function formatDate(dateString) {
+    const date = new Date(dateString);
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const day = String(date.getDate()).padStart(2, "0");
+    return `${year}-${month}-${day}`;
+  }
+
   const columns = [
     {
-      field: "createdAt",
+      field: "date",
       headerName: "Date",
       width: 180,
       renderCell: (params) => {
-        const date = new Date(params.row.createdAt);
+        const date = new Date(params.row.date);
         const formattedDate = `${(date.getMonth() + 1)
           .toString()
           .padStart(2, "0")}/${date
@@ -146,13 +216,34 @@ const SalesManagement = () => {
         return <div>{formattedDate}</div>;
       },
     },
-    { field: "orderNo", headerName: "Starting Cash", width: 180 },
-    { field: "paymentType", headerName: "Gross Sales", width: 180 },
-    { field: "paymentCode", headerName: "Total Discounts", width: 180 },
-    { field: "orderType", headerName: "Refunds", width: 180 },
-    { field: "noItems", headerName: "Net Sales", width: 180 },
-    { field: "promoUsed", headerName: "Expenses", width: 180 },
-    { field: "subTotal", headerName: "Gross Income", width: 180 },
+    { field: "startCash", headerName: "Starting Cash", width: 180 },
+    { field: "grossSales", headerName: "Gross Sales (Php)", width: 180 },
+    {
+      field: "totalDiscounts",
+      headerName: "Total Discounts (Php)",
+      width: 180,
+    },
+    { field: "refunds", headerName: "Refunds (Php)", width: 180 },
+    { field: "netSales", headerName: "Net Sales (Php)", width: 180 },
+    { field: "expenses", headerName: "Expenses (Php)", width: 180 },
+    { field: "grossIncome", headerName: "Gross Income (Php)", width: 180 },
+    {
+      field: "action",
+      headerName: "Action",
+      width: 100,
+      renderCell: (params) => (
+        <div style={{ display: "flex", gap: "1em" }}>
+          <DeleteForeverIcon
+            onClick={() => handleDelete(params.row._id)}
+            sx={{
+              color: theme.palette.secondary[400],
+              cursor: "pointer",
+              fontSize: "2.5em",
+            }}
+          />
+        </div>
+      ),
+    },
   ];
 
   return (
@@ -183,7 +274,9 @@ const SalesManagement = () => {
             </Button>
             <Button
               variant="contained"
-              onClick={() => handleClickLink("")}
+              onClick={() =>
+                handleClickLink("/sales management/refund-records")
+              }
               sx={{ fontSize: "1.1em" }}
             >
               Refunded
@@ -215,7 +308,12 @@ const SalesManagement = () => {
             width={{ xs: "90vw", sm: "60%", md: "60%", lg: "60%" }}
             sx={{ background: theme.palette.secondary[700] }}
           >
-            <LineSalesChart />
+            <LineSalesChart
+              data={eod.map((item) => ({
+                x: formatDate(item.date),
+                y: item.grossSales,
+              }))}
+            />
           </Box>
           <StatBox
             title={"Total Sales"}
@@ -223,6 +321,13 @@ const SalesManagement = () => {
             increase={totalSale.incomePercentage}
             date={totalSale.totalSaleDate}
             width={{ xs: "100%", sm: "40%", md: "40%", lg: "40%", xl: "40%" }}
+            height={{
+              xs: "15vh",
+              sm: "15vh",
+              md: "35vh",
+              lg: "35vh",
+              xl: "25vh",
+            }}
             bg={theme.palette.primary[700]}
           />
         </FlexBetween>
@@ -236,7 +341,13 @@ const SalesManagement = () => {
         >
           <Box display="flex" gap="1em">
             <Tooltip title="This button adds End of Day (EoD) data">
-              <Button variant="contained" color="success">
+              <Button
+                variant="contained"
+                color="success"
+                onClick={() =>
+                  handleClickLink(`/add eod/start-cash/${startCash}`)
+                }
+              >
                 Add EoD
               </Button>
             </Tooltip>
@@ -291,7 +402,7 @@ const SalesManagement = () => {
           }}
         >
           <DataGrid
-            rows={[]}
+            rows={eod}
             columns={columns}
             initialState={{
               pagination: {
@@ -318,6 +429,7 @@ const SalesManagement = () => {
             {Object.entries(coinQuantities).map(([denomination, quantity]) => (
               <Grid item xs={6} sm={4} md={3} key={denomination}>
                 <TextField
+                  color="secondary"
                   label={`${denomination} Peso(s)`}
                   type="number"
                   value={quantity}
@@ -328,6 +440,7 @@ const SalesManagement = () => {
           </Grid>
           <Box mb={2} marginTop="2em">
             <TextField
+              color="secondary"
               label="Total Starting Cash"
               type="number"
               value={calculateTotal().toFixed(2)}
@@ -337,13 +450,28 @@ const SalesManagement = () => {
         </DialogContent>
         <DialogActions sx={{ background: theme.palette.primary[700] }}>
           <Button onClick={handleClearCash} color="error" variant="outlined">
-            Clear
+            Reset
           </Button>
           <Button
             onClick={handleCashDialogConfirm}
             color="success"
             variant="contained"
           >
+            Confirm
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      <Dialog open={deleteDialogOpen} onClose={handleCancelDelete}>
+        <DialogTitle>Delete Confirmation</DialogTitle>
+        <DialogContent>
+          Are you sure you want to delete this record?
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCancelDelete} sx={{ color: "#000" }}>
+            Cancel
+          </Button>
+          <Button onClick={handleConfirmDelete} sx={{ color: "#26B02B" }}>
             Confirm
           </Button>
         </DialogActions>

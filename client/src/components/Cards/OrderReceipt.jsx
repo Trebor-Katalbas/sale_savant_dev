@@ -16,17 +16,24 @@ import {
   InputLabel,
   Snackbar,
   Alert,
+  Checkbox,
+  FormControlLabel,
+  IconButton,
 } from "@mui/material";
 import { FlexBetween } from "components";
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { baseUrl } from "state/api";
+import AddIcon from "@mui/icons-material/Add";
+import RemoveIcon from "@mui/icons-material/Remove";
 
 const OrderReceipt = ({
   orderId,
   tableNo,
   orderNo,
   orderType,
+  paymentType,
+  paymentCode,
   items,
   amountDiscounted,
   subtotal,
@@ -39,11 +46,73 @@ const OrderReceipt = ({
   const [selectedPaymentType, setSelectedPaymentType] = useState("");
   const [amountPaid, setAmountPaid] = useState(null);
   const [alertOpen, setAlertOpen] = useState(false);
+  const [refundModalOpen, setRefundModalOpen] = useState(false);
+  const [selectedItems, setSelectedItems] = useState([]);
+  const [refundQuantities, setRefundQuantities] = useState({});
   const theme = useTheme();
   const navigate = useNavigate();
   const isDesktop = useMediaQuery(theme.breakpoints.up("md"));
 
-  const changeReceiptStatus = async (newStatus) => {
+  const handleOpenRefundModal = () => {
+    setRefundModalOpen(true);
+  };
+
+  const handleCloseRefundModal = () => {
+    setRefundModalOpen(false);
+  };
+
+  const handleSelectItemForRefund = (item) => {
+    const selectedIndex = selectedItems.indexOf(item);
+    let newSelected = [];
+
+    if (selectedIndex === -1) {
+      newSelected = newSelected.concat(selectedItems, item);
+    } else if (selectedIndex === 0) {
+      newSelected = newSelected.concat(selectedItems.slice(1));
+    } else if (selectedIndex === selectedItems.length - 1) {
+      newSelected = newSelected.concat(selectedItems.slice(0, -1));
+    } else if (selectedIndex > 0) {
+      newSelected = newSelected.concat(
+        selectedItems.slice(0, selectedIndex),
+        selectedItems.slice(selectedIndex + 1)
+      );
+    }
+
+    setSelectedItems(newSelected);
+  };
+
+  const handleRefundQuantityChange = (itemId, change) => {
+    const newQuantity = (refundQuantities[itemId] || 0) + change;
+    if (
+      newQuantity >= 0 &&
+      newQuantity <= items.find((item) => item._id === itemId).quantity
+    ) {
+      setRefundQuantities((prevQuantities) => ({
+        ...prevQuantities,
+        [itemId]: newQuantity,
+      }));
+    }
+  };
+
+  const calculateRefundTotal = () => {
+    let total = 0;
+    selectedItems.forEach((item) => {
+      const quantity = refundQuantities[item._id] || 0;
+      total += item.price * quantity;
+    });
+    return total;
+  };
+
+  const handleRefundItems = () => {
+    addRefund();
+    setRefundModalOpen(false);
+  };
+
+  const changeReceiptData = async (
+    newStatus,
+    newPaymentType,
+    newPaymentCode
+  ) => {
     try {
       const response = await fetch(
         `${baseUrl}cashier/update-receipt-status/${orderId}`,
@@ -52,7 +121,11 @@ const OrderReceipt = ({
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify({ status: newStatus }),
+          body: JSON.stringify({
+            status: newStatus,
+            paymentType: newPaymentType,
+            paymentCode: newPaymentCode,
+          }),
         }
       );
 
@@ -63,6 +136,79 @@ const OrderReceipt = ({
       }
     } catch (error) {
       console.error("An error occurred while updating order status:", error);
+    }
+  };
+
+  const changeReceiptRefunded = async (items, totalAmount) => {
+    try {
+      const response = await fetch(
+        `${baseUrl}cashier/update-receipt-status/${orderId}`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            items: items,
+            amountDiscounted: 0,
+            subTotal: totalAmount - calculateRefundTotal(),
+            totalAmount: totalAmount - calculateRefundTotal(),
+          }),
+        }
+      );
+
+      if (response.ok) {
+        console.log("Order receipt updated successfully");
+      } else {
+        console.error("Failed to update order status:", response.statusText);
+      }
+    } catch (error) {
+      console.error("An error occurred while updating order status:", error);
+    }
+  };
+
+  const addRefund = async () => {
+    try {
+      const requestBody = {
+        items: selectedItems.map((item) => ({
+          menuItemId: item.menuItemId,
+          menuItem: item.menuItem,
+          quantity: refundQuantities[item._id] || 0,
+          price: item.price,
+          totalPrice: (refundQuantities[item._id] || 0) * item.price,
+        })),
+        orderNo,
+        paymentType: paymentType,
+        paymentCode: paymentCode,
+        subTotal: subtotal,
+        amountDiscounted: amountDiscounted,
+        totalAmount: totalAmount,
+        totalRefund: calculateRefundTotal(),
+        newAmount: subtotal - calculateRefundTotal(),
+      };
+
+      const response = await fetch(`${baseUrl}cashier/add-refund`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(requestBody),
+      });
+
+      if (response.ok) {
+        console.log("Refund added successfully");
+
+        const updatedItems = items.map((item) => ({
+          ...item,
+          quantity: item.quantity - (refundQuantities[item._id] || 0),
+        }));
+
+        changeReceiptRefunded(updatedItems, subtotal);
+      } else {
+        console.error("Failed to add refund:", response.statusText);
+      }
+    } catch (error) {
+      console.error("An error occurred while adding refund:", error);
     }
   };
 
@@ -118,7 +264,7 @@ const OrderReceipt = ({
       return;
     }
     addOrderSale();
-    changeReceiptStatus("Paid");
+    changeReceiptData("Paid", selectedPaymentType, transactionCode);
     setDialogOpen(false);
   };
 
@@ -314,13 +460,7 @@ const OrderReceipt = ({
               margin: "1em",
             }}
           >
-            <Button
-              variant="contained"
-              size={status === "Unpaid" ? "small" : "large"}
-            >
-              Refund
-            </Button>
-            {status === "Unpaid" && (
+            {status === "Unpaid" ? (
               <>
                 <Button
                   variant="contained"
@@ -344,6 +484,16 @@ const OrderReceipt = ({
                   }}
                 >
                   Pay by Cash
+                </Button>
+              </>
+            ) : (
+              <>
+                <Button
+                  variant="contained"
+                  size={status === "Unpaid" ? "small" : "large"}
+                  onClick={handleOpenRefundModal}
+                >
+                  Refund
                 </Button>
               </>
             )}
@@ -441,6 +591,75 @@ const OrderReceipt = ({
           Insufficient balance!
         </Alert>
       </Snackbar>
+
+      <Dialog open={refundModalOpen} onClose={handleCloseRefundModal}>
+        <DialogTitle>Refund Items</DialogTitle>
+        <DialogContent sx={{ display: "flex", flexDirection: "column" }}>
+          {items.map((item, index) => (
+            <div key={index}>
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    checked={selectedItems.includes(item)}
+                    onChange={() => handleSelectItemForRefund(item)}
+                    color="secondary"
+                  />
+                }
+                label={`${item.menuItem} -  Php ${item.totalPrice}`}
+              />
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  marginBottom: "2em",
+                }}
+              >
+                <IconButton
+                  onClick={() => handleRefundQuantityChange(item._id, -1)}
+                  disabled={(refundQuantities[item._id] || 0) <= 0}
+                >
+                  <RemoveIcon
+                    sx={{
+                      background: theme.palette.secondary[800],
+                      borderRadius: "50%",
+                    }}
+                  />
+                </IconButton>
+                <Typography>{refundQuantities[item._id] || 0}</Typography>
+                <IconButton
+                  onClick={() => handleRefundQuantityChange(item._id, 1)}
+                  disabled={(refundQuantities[item._id] || 0) >= item.quantity}
+                >
+                  <AddIcon
+                    sx={{
+                      background: theme.palette.secondary[800],
+                      borderRadius: "50%",
+                    }}
+                  />
+                </IconButton>
+              </div>
+            </div>
+          ))}
+          <Divider sx={{ margin: "1em 0" }} />
+          <Typography>Total Refund Amount: {calculateRefundTotal()}</Typography>
+        </DialogContent>
+        <DialogActions>
+          <Button
+            onClick={handleCloseRefundModal}
+            variant="outlined"
+            color="secondary"
+          >
+            Cancel
+          </Button>
+          <Button
+            onClick={handleRefundItems}
+            variant="contained"
+            color="success"
+          >
+            Refund
+          </Button>
+        </DialogActions>
+      </Dialog>
     </>
   );
 };

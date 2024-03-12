@@ -11,3 +11,4 @@ export {default as OrderReceipt} from './Cards/OrderReceipt.jsx'
 export {default as StatBox} from './Card/StatBox.jsx'
 
 export {default as LineSalesChart} from './Charts/LineSalesChart.jsx'
+export {default as PieChart} from './Charts/PieChart.jsx'
