@@ -1,8 +1,11 @@
 import {
+  Alert,
   Box,
   Button,
+  CircularProgress,
   Container,
   FormControl,
+  Snackbar,
   TextField,
   Typography,
 } from "@mui/material";
@@ -14,6 +17,7 @@ import { useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { setLogin } from "state";
 import { baseUrl } from "state/api";
+import React, { useState } from "react";
 
 const loginSchema = yup.object().shape({
   userNumber: yup.string().required("required"),
@@ -23,6 +27,8 @@ const loginSchema = yup.object().shape({
 const Login = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
+  const [showErrorAlert, setShowErrorAlert] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   const initialValuesLogin = {
     userNumber: "",
@@ -31,6 +37,8 @@ const Login = () => {
 
   const handleFormSubmit = async (values) => {
     try {
+      setLoading(true);
+
       const response = await fetch(`${baseUrl}auth/login`, {
         method: "POST",
         headers: {
@@ -48,12 +56,14 @@ const Login = () => {
             token: data.token,
           })
         );
-        console.log("Dispatched setLogin action:", setLogin({
-          user: data.user,
-          token: data.token,
-        }));
-        
-        
+        console.log(
+          "Dispatched setLogin action:",
+          setLogin({
+            user: data.user,
+            token: data.token,
+          })
+        );
+
         if (data.user.role === "Manager") {
           navigate("/home");
         } else if (data.user.role === "Cashier") {
@@ -62,11 +72,18 @@ const Login = () => {
           console.error("Unknown role:", data.user.role);
         }
       } else {
+        setShowErrorAlert(true);
         console.error("Login failed:", response.statusText);
       }
     } catch (error) {
       console.error("An error occurred during the fetch:", error);
+    } finally {
+      setLoading(false);
     }
+  };
+
+  const handleCloseErrorAlert = () => {
+    setShowErrorAlert(false);
   };
 
   return (
@@ -225,6 +242,7 @@ const Login = () => {
                     <Button
                       type="submit"
                       variant="contained"
+                      disabled={loading}
                       sx={{
                         color: "#fff",
                         fontSize: "1.1em",
@@ -236,7 +254,22 @@ const Login = () => {
                         },
                       }}
                     >
-                      Login
+                      {loading ? (
+                        <>
+                          <div
+                            style={{
+                              display: "flex",
+                              gap: "1em",
+                              alignItems: "center",
+                            }}
+                          >
+                            <CircularProgress color="success" size={25}/>
+                            <Typography variant="h5" > Logging in...</Typography>
+                          </div>
+                        </>
+                      ) : (
+                        "Login"
+                      )}
                     </Button>
                   </FormControl>
                 </Form>
@@ -245,6 +278,21 @@ const Login = () => {
           </Formik>
         </Container>
       </Box>
+
+      <Snackbar
+        open={showErrorAlert}
+        autoHideDuration={6000}
+        onClose={handleCloseErrorAlert}
+        anchorOrigin={{ vertical: "top", horizontal: "center" }}
+      >
+        <Alert
+          onClose={handleCloseErrorAlert}
+          severity="error"
+          sx={{ width: "100%", border: "solid #FF3B24 1px" }}
+        >
+          Invalid credentials.
+        </Alert>
+      </Snackbar>
     </>
   );
 };

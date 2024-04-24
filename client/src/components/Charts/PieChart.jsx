@@ -1,25 +1,19 @@
 import React from "react";
 import { ResponsivePie } from "@nivo/pie";
-import { Box, Typography, useTheme } from "@mui/material";
+import { Box, Typography, useMediaQuery, useTheme } from "@mui/material";
 
 const PieChart = ({ data }) => {
   const theme = useTheme();
-
-  const colors = [
-    theme.palette.secondary[300],
-    theme.palette.secondary[400],
-    theme.palette.secondary[600],
-    theme.palette.secondary[700],
-  ];
+  const isNonMediumScreens = useMediaQuery("(min-width: 1200px)");
 
   return (
-    <Box width={600} height={300} position="relative">
+    <Box width={isNonMediumScreens ? 620 : undefined} height={isNonMediumScreens ? 300 : 420} position="relative">
       <ResponsivePie
         data={data}
         margin={{ top: 40, right: 80, bottom: 80, left: 80 }}
-        innerRadius={0.4}
+        innerRadius={0.5}
         padAngle={2}
-        cornerRadius={20}
+        cornerRadius={5}
         activeInnerRadiusOffset={19}
         borderWidth={1}
         borderColor={{
@@ -109,12 +103,12 @@ const PieChart = ({ data }) => {
         ]}
         legends={[
           {
-            anchor: "bottom-right",
+            anchor: "bottom-left",
             direction: "column",
             justify: false,
-            translateX: 20,
-            translateY: 80,
-            itemsSpacing: 4,
+            translateX: -60,
+            translateY: 75,
+            itemsSpacing: 2,
             itemWidth: 100,
             itemHeight: 18,
             itemTextColor: "#999",

@@ -1,4 +1,4 @@
-import { Box, useTheme } from "@mui/material";
+import { Box, Typography, useMediaQuery, useTheme } from "@mui/material";
 import { Header, LineSalesChart, PieChart, StatBox } from "components";
 import React, { useEffect, useState } from "react";
 import { baseUrl } from "state/api";
@@ -7,6 +7,8 @@ const Dashboard = () => {
   const theme = useTheme();
   const [eod, setEOD] = useState([]);
   const [sold, setNoSold] = useState([]);
+  const isNonMediumScreens = useMediaQuery("(min-width: 1200px)");
+  console.log(sold);
 
   const fetchEOD = async () => {
     try {
@@ -168,7 +170,7 @@ const Dashboard = () => {
           <Box
             borderRadius="10px"
             height="360px"
-            width={{ xs: "90vw", sm: "60%", md: "60%", lg: "60%" }}
+            width={isNonMediumScreens ? "60%" : undefined}
             sx={{ background: theme.palette.secondary[700] }}
           >
             <LineSalesChart
@@ -184,7 +186,13 @@ const Dashboard = () => {
               borderRadius: "10px",
             }}
           >
-            <PieChart data={sold.map((item) => ({ id: item.menuItem, value: item.price }))} /> 
+            <Typography sx={{margin:"1em"}}> Top Dishes by Number of Sold</Typography>
+            <PieChart
+              data={sold.map((item) => ({
+                id: item.menuItem,
+                value: item.noSold,
+              }))}
+            />
           </Box>
         </Box>
       </Box>
