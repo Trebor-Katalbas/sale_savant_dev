@@ -56,11 +56,13 @@ const SupplyRecords = () => {
       "Supplier Name": record.supplier[0].supplierName,
       "Contact Person": record.supplier[0].contactPerson,
       "Contact #": record.supplier[0].contactNo,
-      Category: record.supplier[0].category,
+      "Category": record.supplier[0].category,
       "Item Name": record.itemName,
-      Quantity: record.quantity,
+      "Quantity": record.quantity,
+      "Unit": record.quantityUnit,
       "Total Cost (Php)": record.totalCost,
-      Status: getStatusText(record.totalPaid, record.totalCost),
+      "Delivery Status": record.deliveryStatus,
+      "Status": getStatusText(record.totalPaid, record.totalCost),
     }));
 
     const ws = XLSX.utils.json_to_sheet(exportData);

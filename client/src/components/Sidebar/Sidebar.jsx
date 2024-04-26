@@ -36,16 +36,16 @@ const navItems = [
     text: "Dashboard",
     icon: <HomeOutlined />,
   },
-  {
-    text: "Reports",
-    icon: <ReceiptLongOutlined />,
-    children: [
-      { text: "Sales", path: "sales-report" },
-      { text: "Customer Purchase History", path: "purchase-history" },
-      { text: "Discount and Promos", path: "promos-report" },
-      { text: "Supplier Deliveries", path: "deliveries-report" },
-    ],
-  },
+  // {
+  //   text: "Reports",
+  //   icon: <ReceiptLongOutlined />,
+  //   children: [
+  //     { text: "Sales", path: "sales-report" },
+  //     { text: "Customer Purchase History", path: "purchase-history" },
+  //     { text: "Discount and Promos", path: "promos-report" },
+  //     { text: "Supplier Deliveries", path: "deliveries-report" },
+  //   ],
+  // },
   {
     text: "Management",
     icon: null,

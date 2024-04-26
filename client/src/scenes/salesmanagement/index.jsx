@@ -14,10 +14,12 @@ import {
 } from "@mui/material";
 import { DataGrid } from "@mui/x-data-grid";
 import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
+import DescriptionIcon from "@mui/icons-material/Description";
 import { FlexBetween, Header, LineSalesChart, StatBox } from "components";
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { baseUrl } from "state/api";
+import * as XLSX from "xlsx";
 
 const SalesManagement = () => {
   const theme = useTheme();
@@ -31,6 +33,30 @@ const SalesManagement = () => {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
 
   const handleClickLink = (link) => navigate(link);
+
+  const handleExportToExcel = () => {
+    const exportData = eod.map((record) => ({
+      Date: new Date(record.createdAt).toLocaleDateString("en-US", {
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit",
+      }),
+      "Cashier Name": record.cashierName,
+      "Starting Cash": record.startCash,
+      "Gross Sales": record.grossSales,
+      "Total Discounts": record.totalDiscounts,
+      "Total Refunds": record.refunds,
+      "Net Sales": record.netSales,
+      "Gross Income": record.grossIncome,
+    }));
+
+    const ws = XLSX.utils.json_to_sheet(exportData);
+
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Supply Records");
+
+    XLSX.writeFile(wb, "Sales_Record.xlsx");
+  };
 
   const fetchEOD = async () => {
     try {
@@ -55,7 +81,9 @@ const SalesManagement = () => {
 
   const fetchEODByMonth = async (month) => {
     try {
-      const response = await fetch(`${baseUrl}home/get-eod-by-month?month=${month}`);
+      const response = await fetch(
+        `${baseUrl}home/get-eod-by-month?month=${month}`
+      );
       if (response.ok) {
         const data = await response.json();
         const eodWithId = data.map((item, index) => ({
@@ -176,7 +204,10 @@ const SalesManagement = () => {
         const date = new Date(params.row.date);
         const formattedDate = `${(date.getMonth() + 1)
           .toString()
-          .padStart(2, "0")}/${date.getDate().toString().padStart(2, "0")}/${date.getFullYear()}`;
+          .padStart(2, "0")}/${date
+          .getDate()
+          .toString()
+          .padStart(2, "0")}/${date.getFullYear()}`;
         return <div>{formattedDate}</div>;
       },
     },
@@ -185,7 +216,9 @@ const SalesManagement = () => {
       headerName: "",
       width: 10,
       sortable: false,
-      renderCell: () => <Divider orientation="vertical" sx={{ marginLeft: "2em" }} />,
+      renderCell: () => (
+        <Divider orientation="vertical" sx={{ marginLeft: "2em" }} />
+      ),
     },
     { field: "cashierName", headerName: "Cashier Name", width: 210 },
     { field: "startCash", headerName: "Starting Cash", width: 120 },
@@ -194,7 +227,9 @@ const SalesManagement = () => {
       headerName: "",
       width: 10,
       sortable: false,
-      renderCell: () => <Divider orientation="vertical" sx={{ marginLeft: "2em" }} />,
+      renderCell: () => (
+        <Divider orientation="vertical" sx={{ marginLeft: "2em" }} />
+      ),
     },
     { field: "grossSales", headerName: "Gross Sales (Php)", width: 120 },
     {
@@ -203,7 +238,9 @@ const SalesManagement = () => {
       width: 180,
       headerAlign: "center",
       renderCell: (params) => (
-        <Typography color={theme.palette.secondary[400]}>{params.value}</Typography>
+        <Typography color={theme.palette.secondary[400]}>
+          {params.value}
+        </Typography>
       ),
     },
     {
@@ -212,7 +249,9 @@ const SalesManagement = () => {
       width: 120,
       headerAlign: "center",
       renderCell: (params) => (
-        <Typography color={theme.palette.secondary[400]}>{params.value}</Typography>
+        <Typography color={theme.palette.secondary[400]}>
+          {params.value}
+        </Typography>
       ),
     },
     {
@@ -230,7 +269,9 @@ const SalesManagement = () => {
       width: 150,
       headerAlign: "center",
       renderCell: (params) => (
-        <Typography color={theme.palette.secondary[400]}>{params.value}</Typography>
+        <Typography color={theme.palette.secondary[400]}>
+          {params.value}
+        </Typography>
       ),
     },
     {
@@ -247,7 +288,9 @@ const SalesManagement = () => {
       headerName: "",
       width: 20,
       sortable: false,
-      renderCell: () => <Divider orientation="vertical" sx={{ marginLeft: "2em" }} />,
+      renderCell: () => (
+        <Divider orientation="vertical" sx={{ marginLeft: "2em" }} />
+      ),
     },
     {
       field: "action",
@@ -257,7 +300,11 @@ const SalesManagement = () => {
         <div style={{ display: "flex", gap: "1em" }}>
           <DeleteForeverIcon
             onClick={() => handleDelete(params.row._id)}
-            sx={{ color: theme.palette.secondary[400], cursor: "pointer", fontSize: "2.5em" }}
+            sx={{
+              color: theme.palette.secondary[400],
+              cursor: "pointer",
+              fontSize: "2.5em",
+            }}
           />
         </div>
       ),
@@ -357,15 +404,24 @@ const SalesManagement = () => {
             flexDirection: { xs: "column", sm: "row", md: "row", lg: "row" },
           }}
         >
-          <Tooltip title="This button adds End of Day (EoD) data">
+          <Box display="flex" gap="1em">
+            <Tooltip title="This button adds End of Day (EoD) data">
+              <Button
+                variant="contained"
+                color="success"
+                onClick={() => handleClickLink(`/add eod`)}
+              >
+                Add EoD
+              </Button>
+            </Tooltip>
             <Button
+              startIcon={<DescriptionIcon color="success" />}
               variant="contained"
-              color="success"
-              onClick={() => handleClickLink(`/add eod`)}
+              onClick={handleExportToExcel}
             >
-              Add EoD
+              Export to Excel
             </Button>
-          </Tooltip>
+          </Box>
           <Typography variant="h6">
             Starting Cash(Today):{" "}
             <span
