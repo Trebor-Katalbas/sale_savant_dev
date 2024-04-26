@@ -27,14 +27,35 @@ const AddLossSchema = Yup.object().shape({
   lossPrice: Yup.number().required("Required"),
 });
 
-const categories = ["Main Dish", "Tausug Dish", "Dessert", "Tausug Dessert", "Drinks"];
-
 const AddLoss = () => {
   const navigate = useNavigate();
   const theme = useTheme();
   const [menuItems, setMenuItems] = useState([]);
+  const [category, setCategory] = useState([]);
   // eslint-disable-next-line
   const [selectedMenuItem, setSelectedMenuItem] = useState("");
+
+  const fetchCategory = async () => {
+    try {
+      const response = await fetch(`${baseUrl}menumanagement/getCategory`);
+      if (response.ok) {
+        const data = await response.json();
+        const categoryWithId = data.map((item, index) => ({
+          ...item,
+          id: index + 1,
+        }));
+        setCategory(categoryWithId);
+      } else {
+        console.error("Failed to fetch category:", response.statusText);
+      }
+    } catch (error) {
+      console.error("An error occurred during the fetch:", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchCategory();
+  }, []);
 
   useEffect(() => {
     const fetchMenuInventory = async () => {
@@ -73,11 +94,11 @@ const AddLoss = () => {
     setSelectedMenuItem(value);
   };
 
-  const groupedMenuItems = categories.reduce((acc, category) => {
+  const groupedMenuItems = category.reduce((acc, category) => {
     const categoryItems = menuItems
-      .filter((menuItem) => menuItem.category === category)
+      .filter((menuItem) => menuItem.category === category.categoryName)
       .sort((a, b) => a.menuItem.localeCompare(b.menuItem));
-    return { ...acc, [category]: categoryItems };
+    return { ...acc, [category.categoryName]: categoryItems };
   }, {});
 
   const initialValues = {
@@ -134,6 +155,7 @@ const AddLoss = () => {
             handleBlur,
             handleChange,
             setValues,
+            setFieldValue,
           }) => (
             <Form>
               <Box sx={{ margin: "2em", width: "60%" }}>
@@ -209,9 +231,9 @@ const AddLoss = () => {
                   error={Boolean(touched.category) && Boolean(errors.category)}
                   helperText={touched.category && errors.category}
                 >
-                  {categories.map((category) => (
-                    <MenuItem key={category} value={category}>
-                      {category}
+                  {category.map((category) => (
+                    <MenuItem key={category} value={category.categoryName}>
+                      {category.categoryName}
                     </MenuItem>
                   ))}
                 </Field>
@@ -282,7 +304,13 @@ const AddLoss = () => {
                     label="Loss Quantity"
                     type="number"
                     onBlur={handleBlur}
-                    onChange={handleChange}
+                    onChange={(e) => {
+                      handleChange(e);
+                      const newLossPrice =
+                        parseFloat(e.target.value) *
+                        parseFloat(values.price);
+                      setFieldValue("lossPrice", newLossPrice); 
+                    }}
                     value={values.lossQuantity}
                     as={TextField}
                     fullWidth
