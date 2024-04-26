@@ -471,11 +471,11 @@ const SalesManagement = () => {
             initialState={{
               pagination: {
                 paginationModel: {
-                  pageSize: 3,
+                  pageSize: 4,
                 },
               },
             }}
-            pageSizeOptions={[3]}
+            pageSizeOptions={[4]}
             disableRowSelectionOnClick
           />
         </Box>

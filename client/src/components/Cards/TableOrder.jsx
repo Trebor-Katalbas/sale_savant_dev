@@ -143,7 +143,7 @@ const TableOrder = ({
           variant="outlined"
           color="success"
           onClick={handleClearTable}
-          sx={{ position: "absolute", top: 10, right: 10, zIndex: 5 }}
+          sx={{ position: "absolute", top: 10, right: 10, zIndex: 5, display: status === "Unpaid" ? "none" : "block" }}
         >
           {tableNo === "Take-out" ? "Settle Receipt" : "Clear Table"}
         </Button>
