@@ -26,42 +26,12 @@ const CashierReports = () => {
   const user = useSelector((state) => state.global.user);
   const userNameSaved = user.userName;
   const [receipt, setReceipt] = useState([]);
-  const [totalSale, setTotalSale] = useState([]);
   const [totalStats, setTotalStats] = useState([]);
   const [startingCash, setStartingCash] = useState([]);
   const [currentStartCash, setCurrentStartCash] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [selectedItemId, setSelectedItemId] = useState(null);
-
-  useEffect(() => {
-    const fetchTotalSaleStat = async () => {
-      try {
-        const response = await fetch(
-          `${baseUrl}sales-management/get-totalSaleStats`
-        );
-        if (response.ok) {
-          const data = await response.json();
-          setTotalSale(data);
-        } else {
-          console.error(
-            "Failed to fetch order sales data:",
-            response.statusText
-          );
-        }
-      } catch (error) {
-        console.error("An error occurred during the fetch:", error);
-      }
-    };
-
-    fetchTotalSaleStat();
-
-    const intervalId = setInterval(() => {
-      fetchTotalSaleStat();
-    }, 60000);
-
-    return () => clearInterval(intervalId);
-  }, []);
 
   useEffect(() => {
     const fetchTotalStat = async () => {
@@ -225,7 +195,7 @@ const CashierReports = () => {
       width: 100,
       renderCell: (params) => {
         if (params.row.userName !== userNameSaved) {
-          return null; 
+          return null;
         }
         return (
           <div style={{ display: "flex", gap: "1em" }}>
@@ -358,7 +328,7 @@ const CashierReports = () => {
                 <Box display="flex" flexDirection="column" gap="1em">
                   <StatBox
                     title={"Total Sales"}
-                    value={`Php ${totalSale.totalSaleAmount}`}
+                    value={`Php ${totalStats.totalSalesToday}`}
                     height="14vh"
                     bg={theme.palette.primary[700]}
                   />

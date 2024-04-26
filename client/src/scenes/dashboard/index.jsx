@@ -121,7 +121,7 @@ const Dashboard = () => {
           >
             <StatBox
               title={"Net Sales"}
-              value={`Php ${latestEod.netSales || 0}`} 
+              value={`Php ${latestEod.netSales || 0}`}
               date={formattedDate}
               width="100%"
               height={{
@@ -135,7 +135,7 @@ const Dashboard = () => {
             />
             <StatBox
               title={"Income"}
-              value={`Php ${latestEod.grossIncome || 0}`} 
+              value={`Php ${latestEod.grossIncome || 0}`}
               date={formattedDate}
               width="100%"
               height={{
@@ -158,7 +158,7 @@ const Dashboard = () => {
           >
             <StatBox
               title={"Expenses"}
-              value={`Php ${latestEod.expenses || 0}`} 
+              value={`Php ${latestEod.expenses || 0}`}
               date={formattedDate}
               width="100%"
               height={{
@@ -172,7 +172,7 @@ const Dashboard = () => {
             />
             <StatBox
               title={"Refunds"}
-              value={`Php ${latestEod.refunds || 0}`} 
+              value={`Php ${latestEod.refunds || 0}`}
               date={formattedDate}
               width="100%"
               height={{
@@ -202,7 +202,7 @@ const Dashboard = () => {
             <LineSalesChart
               data={eodByMonth.map((item) => ({
                 x: formatDate(item.date),
-                y: item.grossSales,
+                y: item.netSales,
               }))}
             />
           </Box>

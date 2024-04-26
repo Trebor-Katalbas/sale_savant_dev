@@ -7,7 +7,7 @@ const LineSalesChart = ({ data }) => {
 
   return (
     <ResponsiveLine
-      data={[{ id: "Total Sales", data }]}
+      data={[{ id: "Net Sales", data }]}
       margin={{ top: 60, right: 30, bottom: 50, left: 70 }}
       theme={{
         grid: {
@@ -76,7 +76,7 @@ const LineSalesChart = ({ data }) => {
       }}
       axisLeft={{
         orient: "left",
-        legend: "Total Sales",
+        legend: "Net Sales",
         legendOffset: -45,
         legendPosition: "middle",
       }}

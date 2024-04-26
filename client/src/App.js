@@ -11,6 +11,7 @@ function App() {
   const mode = useSelector((state) => state.global.mode);
   const theme = useMemo(() => createTheme(themeSettings(mode)), [mode]);
   const isAuth = Boolean(useSelector((state) => state.global.token));
+  const role = useSelector((state) => state.global)
 
   return (
     <div className="app">
@@ -93,9 +94,9 @@ function App() {
               {/* Reports */}
               <Route path="/cashier-reports" element={<pages.CashierReports />}/>
               <Route path="/add-startcash" element={<pages.AddStartCash /> } />
-              
+
             </Route>
-            
+
           </Routes>
         </ThemeProvider>
       </BrowserRouter>

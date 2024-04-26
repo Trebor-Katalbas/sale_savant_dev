@@ -94,7 +94,7 @@ export const getEODByMonth = async (req, res) => {
   try {
     const { month } = req.query;
     const startDate = new Date();
-    startDate.setMonth(month - 1); 
+    startDate.setMonth(month - 1);
     startDate.setDate(1);
     startDate.setHours(0, 0, 0, 0);
 
@@ -133,16 +133,19 @@ export const getCashierReport = async (req, res) => {
       createdAt: { $gte: currentDate, $lt: endOfDay }
     });
 
+    const totalSalesToday = orderSales.reduce((total, sale) => total + sale.subTotal, 0);
+
     const totalAmountDiscounted = orderSales.reduce((total, sale) => total + sale.amountDiscounted, 0);
 
     const totalRefundsAmount = refunds.reduce((total, refund) => total + refund.totalRefund, 0);
 
-    const totalExpenses = expenses.reduce((total, expenses) => total + expenses.subTotal, 0);
+    const totalExpenses = expenses.reduce((total, expenses) => total + expenses.totalPaid, 0);
 
     const currentReport = {
       totalAmountDiscounted,
       totalRefundsAmount,
       totalExpenses,
+      totalSalesToday
     };
 
     res.status(200).json(currentReport);

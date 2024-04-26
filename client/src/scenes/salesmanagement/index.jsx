@@ -376,7 +376,7 @@ const SalesManagement = () => {
             <LineSalesChart
               data={eodByMonth.map((item) => ({
                 x: formatDate(item.date),
-                y: item.grossSales,
+                y: item.netSales,
               }))}
             />
           </Box>

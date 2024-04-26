@@ -23,41 +23,11 @@ const AddEODSchema = Yup.object().shape({
 const AddEOD = () => {
   const theme = useTheme();
   const [currentStartCash, setCurrentStartCash] = useState([]);
-  const [totalSale, setTotalSale] = useState([]);
   const [totalStats, setTotalStats] = useState([]);
   const navigate = useNavigate();
   const date = new Date();
   const nextDay = new Date(date);
-  nextDay.setDate(nextDay.getDate() + 1);
-
-  useEffect(() => {
-    const fetchTotalSaleStat = async () => {
-      try {
-        const response = await fetch(
-          `${baseUrl}sales-management/get-totalSaleStats`
-        );
-        if (response.ok) {
-          const data = await response.json();
-          setTotalSale(data);
-        } else {
-          console.error(
-            "Failed to fetch order sales data:",
-            response.statusText
-          );
-        }
-      } catch (error) {
-        console.error("An error occurred during the fetch:", error);
-      }
-    };
-
-    fetchTotalSaleStat();
-
-    const intervalId = setInterval(() => {
-      fetchTotalSaleStat();
-    }, 60000);
-
-    return () => clearInterval(intervalId);
-  }, []);
+  nextDay.setDate(nextDay.getDate());
 
   useEffect(() => {
     const fetchTotalStat = async () => {
@@ -244,7 +214,7 @@ const AddEOD = () => {
                         <Typography variant="h6">Total Sales</Typography>
                         <Divider sx={{ margin: "0.6em 0" }} />
                         <Typography variant="body1">
-                          Php {totalSale.totalSaleAmount}
+                          Php {totalStats.totalSalesToday}
                         </Typography>
                       </Box>
                       <Box textAlign="center">
