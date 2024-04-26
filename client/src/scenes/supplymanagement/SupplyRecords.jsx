@@ -9,10 +9,13 @@ import {
   DialogTitle,
   Divider,
   FormControl,
+  FormControlLabel,
   InputAdornment,
   InputBase,
   InputLabel,
   MenuItem,
+  Radio,
+  RadioGroup,
   Select,
   TextField,
   Toolbar,
@@ -35,6 +38,7 @@ const SupplyRecords = () => {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [editedTotalPaid, setEditedTotalPaid] = useState(0);
+  const [deliveryStatus, setDeliveryStatus] = useState("");
   const [categories, setCategories] = useState([]);
   const [searchInput, setSearchInput] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("All");
@@ -143,6 +147,9 @@ const SupplyRecords = () => {
     setEditedTotalPaid(
       supplyRecord.find((record) => record._id === _id).totalPaid
     );
+    setDeliveryStatus(
+      supplyRecord.find((record) => record._id === _id).deliveryStatus
+    );
     setEditDialogOpen(true);
   };
 
@@ -171,7 +178,10 @@ const SupplyRecords = () => {
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify({ totalPaid: editedTotalPaid }),
+          body: JSON.stringify({
+            totalPaid: editedTotalPaid,
+            deliveryStatus: deliveryStatus,
+          }),
         }
       );
 
@@ -233,7 +243,7 @@ const SupplyRecords = () => {
     {
       field: "deliveryDate",
       headerName: "Delivery Date",
-      width: 140,
+      width: 110,
       valueFormatter: (params) => {
         const date = new Date(params.value);
         return date.toLocaleDateString("en-US", {
@@ -273,12 +283,12 @@ const SupplyRecords = () => {
     {
       field: "category",
       headerName: "Category",
-      width: 160,
+      width: 120,
       valueGetter: (params) => params.row.supplier[0].category,
     },
     { field: "itemName", headerName: "Item Name", width: 140 },
     { field: "quantity", headerName: "Quantity", width: 80 },
-    { field: "quantityUnit", headerName: "Unit", width: 80 },
+    { field: "quantityUnit", headerName: "Unit", width: 60 },
     {
       field: "deliveryStatus",
       headerName: "Delivery Status",
@@ -508,7 +518,7 @@ const SupplyRecords = () => {
       </Dialog>
 
       <Dialog open={editDialogOpen} onClose={handleCancelEdit}>
-        <DialogTitle>Change Total Paid</DialogTitle>
+        <DialogTitle>Edit</DialogTitle>
         <DialogContent>
           <TextField
             autoFocus
@@ -525,6 +535,28 @@ const SupplyRecords = () => {
               ),
             }}
           />
+          <RadioGroup
+            aria-label="deliveryStatus"
+            name="deliveryStatus"
+            value={deliveryStatus}
+            onChange={(e) => setDeliveryStatus(e.target.value)}
+          >
+            <FormControlLabel
+              value="Not Delivered"
+              control={<Radio color="secondary"/>}
+              label="Not Delivered"
+            />
+            <FormControlLabel
+              value="Partial Delivery"
+              control={<Radio color="secondary"/>}
+              label="Partial Delivery"
+            />
+            <FormControlLabel
+              value="Full Delivery"
+              control={<Radio color="secondary"/>}
+              label="Full Delivery"
+            />
+          </RadioGroup>
         </DialogContent>
         <DialogActions>
           <Button onClick={handleCancelEdit} sx={{ color: "#000" }}>

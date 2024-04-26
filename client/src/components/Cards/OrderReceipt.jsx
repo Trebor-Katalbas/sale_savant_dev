@@ -21,7 +21,7 @@ import {
   IconButton,
 } from "@mui/material";
 import { FlexBetween } from "components";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { baseUrl } from "state/api";
 import AddIcon from "@mui/icons-material/Add";
@@ -47,11 +47,34 @@ const OrderReceipt = ({
   const [amountPaid, setAmountPaid] = useState(null);
   const [alertOpen, setAlertOpen] = useState(false);
   const [refundModalOpen, setRefundModalOpen] = useState(false);
+  const [voidModalOpen, setVoidModalOpen] = useState(false);
   const [selectedItems, setSelectedItems] = useState([]);
   const [refundQuantities, setRefundQuantities] = useState({});
+  const [voidPin, setVoidPin] = useState([]);
+  const [enteredVoidPin, setEnteredVoidPin] = useState(""); 
+  const [isValidVoidPin, setIsValidVoidPin] = useState(false);
   const theme = useTheme();
   const navigate = useNavigate();
   const isDesktop = useMediaQuery(theme.breakpoints.up("md"));
+
+  useEffect(() => {
+    const fetchVoidPin = async () => {
+      try {
+        const response = await fetch(`${baseUrl}auth/getVoid`);
+        if (response.ok) {
+          const data = await response.json();
+          console.log(data);
+          setVoidPin(data);
+        } else {
+          console.error("Failed to fetch void data:", response.statusText);
+        }
+      } catch (error) {
+        console.error("An error occurred during the fetch:", error);
+      }
+    };
+
+    fetchVoidPin();
+  }, []);
 
   const handleOpenRefundModal = () => {
     setRefundModalOpen(true);
@@ -59,6 +82,18 @@ const OrderReceipt = ({
 
   const handleCloseRefundModal = () => {
     setRefundModalOpen(false);
+  };
+
+  const handleOpenVoidModal = () => {
+    setVoidModalOpen(true);
+  };
+
+  const handleCloseVoidModal = () => {
+    setVoidModalOpen(false);
+  };
+
+  const handleSnackbarClose = () => {
+    setIsValidVoidPin(false);
   };
 
   const handleSelectItemForRefund = (item) => {
@@ -101,6 +136,17 @@ const OrderReceipt = ({
       total += item.price * quantity;
     });
     return total;
+  };
+
+  const handleRefundWithVoidPin = () => {
+    if (enteredVoidPin === voidPin[0].voidPin) {
+      handleRefundItems();
+      setRefundModalOpen(false);
+      setEnteredVoidPin(""); 
+      setVoidModalOpen(false);
+    } else {
+      setIsValidVoidPin(true);
+    }
   };
 
   const handleRefundItems = () => {
@@ -652,7 +698,7 @@ const OrderReceipt = ({
             Cancel
           </Button>
           <Button
-            onClick={handleRefundItems}
+            onClick={handleOpenVoidModal}
             variant="contained"
             color="success"
           >
@@ -660,6 +706,51 @@ const OrderReceipt = ({
           </Button>
         </DialogActions>
       </Dialog>
+
+      <Dialog open={voidModalOpen} onClose={handleCloseVoidModal}>
+        <DialogTitle>Enter Void Pin</DialogTitle>
+        <DialogContent sx={{ display: "flex", flexDirection: "column" }}>
+          <TextField
+            label="Void Pin"
+            type="password"
+            value={enteredVoidPin}
+            onChange={(e) => setEnteredVoidPin(e.target.value)}
+            fullWidth
+            color="secondary"
+            margin="normal"
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button
+            onClick={handleCloseVoidModal}
+            variant="outlined"
+            color="secondary"
+          >
+            Cancel
+          </Button>
+          <Button
+            onClick={handleRefundWithVoidPin}
+            variant="contained"
+            color="success"
+          >
+            Confirm
+          </Button>
+        </DialogActions>
+      </Dialog>
+      <Snackbar
+        anchorOrigin={{ vertical: "top", horizontal: "center" }}
+        open={isValidVoidPin}
+        autoHideDuration={6000}
+        onClose={handleSnackbarClose}
+      >
+      <Alert
+          onClose={handleSnackbarClose}
+          severity="error"
+          sx={{ width: "100%", border: "solid #FF3B24 1px" }}
+        >
+          Invalid Void PIN!
+        </Alert>
+        </Snackbar>
     </>
   );
 };

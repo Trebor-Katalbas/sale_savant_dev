@@ -127,7 +127,7 @@ export const updateSupplier = async (req, res) => {
 export const updateTotalPaid = async (req, res) => {
   try {
     const { id } = req.params;
-    const { totalPaid } = req.body;
+    const { totalPaid, deliveryStatus } = req.body;
 
     const existingSupplyRecord = await SupplyDelivery.findById(id);
 
@@ -136,6 +136,7 @@ export const updateTotalPaid = async (req, res) => {
     }
 
     existingSupplyRecord.totalPaid = totalPaid;
+    existingSupplyRecord.deliveryStatus = deliveryStatus;
 
     const updateTotalPaid = await existingSupplyRecord.save();
 

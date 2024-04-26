@@ -2,8 +2,11 @@ import React, { useEffect, useState } from "react";
 import {
   Box,
   Button,
+  FormControlLabel,
   InputLabel,
   MenuItem,
+  Radio,
+  RadioGroup,
   TextField,
   useTheme,
 } from "@mui/material";
@@ -24,7 +27,7 @@ const AddSupplyDeliverSchema = Yup.object().shape({
   totalCost: Yup.number().required("Required"),
 });
 
-const unitOptions = ["pcs", "boxes", "kg", "g", "L", "mL"];
+const unitOptions = ["pcs", "boxes", "trays", "kg", "g", "L", "mL"];
 
 const AddSupplyRecord = () => {
   const navigate = useNavigate();
@@ -204,20 +207,28 @@ const AddSupplyRecord = () => {
                 <InputLabel htmlFor="deliveryStatus">
                   Delivery Status
                 </InputLabel>
-                <Field
+                <RadioGroup
+                  aria-label="deliveryStatus"
                   name="deliveryStatus"
-                  as="div"
-                  sx={{ marginTop: "0.5em", display: "flex", gap: "1em" }}
+                  value={values.deliveryStatus}
+                  onChange={handleChange}
                 >
-                  <label>
-                    <Field type="radio" name="deliveryStatus" value="Partial Delivery" />
-                    Partial Delivery
-                  </label>
-                  <label>
-                    <Field type="radio" name="deliveryStatus" value="Full Delivery" />
-                    Full Delivery
-                  </label>
-                </Field>
+                  <FormControlLabel
+                    value="Not Delivered"
+                    control={<Radio color="secondary" />}
+                    label="Not Delivered"
+                  />
+                  <FormControlLabel
+                    value="Partial Delivery"
+                    control={<Radio color="secondary" />}
+                    label="Partial Delivery"
+                  />
+                  <FormControlLabel
+                    value="Full Delivery"
+                    control={<Radio color="secondary" />}
+                    label="Full Delivery"
+                  />
+                </RadioGroup>
               </Box>
               <Box display="flex" gap="1.5em">
                 <Field
