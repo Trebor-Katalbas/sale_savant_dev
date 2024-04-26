@@ -59,7 +59,7 @@ const StatBox = ({ title, value, increase, description, date, width, height, bg 
                 fontStyle="italic"
                 sx={{ color: "#000" }}
               >
-                {increase}%
+                {increase}
               </Typography>
             </>
           )}

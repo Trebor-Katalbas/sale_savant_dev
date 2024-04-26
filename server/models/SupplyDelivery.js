@@ -39,6 +39,14 @@ const SupplyDeliverySchema = new mongoose.Schema(
       type: Number,
       required: true,
     },
+    quantityUnit: {
+      type: String,
+      required: true,
+    },
+    deliveryStatus: {
+      type: String,
+      required: true,
+    },
     totalPaid: {
       type: Number,
       required: true,

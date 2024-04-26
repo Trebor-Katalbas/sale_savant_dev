@@ -149,6 +149,7 @@ const ModifyTable = () => {
             </Button>
           </Badge>
           <Button variant="contained" onClick={() => handleButtonClick("/refunds")}>Refunds</Button>
+          <Button variant="contained" onClick={() => handleButtonClick("/cashier-reports")}>Reports</Button>
         </div>
 
         <Box

@@ -15,6 +15,7 @@ import {
   Typography,
 } from "@mui/material";
 import AddCircleIcon from "@mui/icons-material/AddCircle";
+import WidgetsIcon from "@mui/icons-material/Widgets";
 import { Link } from "react-router-dom";
 import { useTheme } from "@emotion/react";
 import { baseUrl } from "state/api";
@@ -23,14 +24,13 @@ const MenuManagement = () => {
   const theme = useTheme();
   const [menuData, setMenuData] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [category, setCategory] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState("All");
 
   useEffect(() => {
     const fetchMenuData = async () => {
       try {
-        const response = await fetch(
-          `${baseUrl}menumanagement/menu`
-        );
+        const response = await fetch(`${baseUrl}menumanagement/menu`);
         if (response.ok) {
           const data = await response.json();
           setMenuData(data);
@@ -43,6 +43,28 @@ const MenuManagement = () => {
     };
 
     fetchMenuData();
+  }, []);
+
+  const fetchCategory = async () => {
+    try {
+      const response = await fetch(`${baseUrl}menumanagement/getCategory`);
+      if (response.ok) {
+        const data = await response.json();
+        const categoryWithId = data.map((item, index) => ({
+          ...item,
+          id: index + 1,
+        }));
+        setCategory(categoryWithId);
+      } else {
+        console.error("Failed to fetch category:", response.statusText);
+      }
+    } catch (error) {
+      console.error("An error occurred during the fetch:", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchCategory();
   }, []);
 
   useEffect(() => {
@@ -98,11 +120,33 @@ const MenuManagement = () => {
                   gap: "0.5em",
                   justifyContent: "center",
                   alignItems: "center",
-                  padding: "0",
+                  padding: "0 !important",
                 }}
               >
                 <AddCircleIcon sx={{ color: "#35D03B", fontSize: "3em" }} />
                 <Typography sx={{ fontSize: "1.5em" }}>Add Menu</Typography>
+              </Container>
+            </Link>
+            <Link
+              style={{
+                textDecoration: "none",
+                color: theme.palette.primary[100],
+              }}
+              to="/add category"
+            >
+              <Container
+                sx={{
+                  display: "flex",
+                  gap: "0.5em",
+                  justifyContent: "center",
+                  alignItems: "center",
+                  padding: "0 !important",
+                }}
+              >
+                <WidgetsIcon sx={{ color: "#F5786A", fontSize: "3em" }} />
+                <Typography sx={{ fontSize: "1.5em" }}>
+                  Manage Category
+                </Typography>
               </Container>
             </Link>
 
@@ -125,11 +169,11 @@ const MenuManagement = () => {
                 }}
               >
                 <MenuItem value="All">All</MenuItem>
-                <MenuItem value="Main Dish">Main Dish</MenuItem>
-                <MenuItem value="Tausug Dish">Tausug Dish</MenuItem>
-                <MenuItem value="Dessert">Dessert</MenuItem>
-                <MenuItem value="Tausug Dessert">Tausug Dessert</MenuItem>
-                <MenuItem value="Drinks">Drinks</MenuItem>
+                {category.map((cat) => (
+                  <MenuItem key={cat.id} value={cat.categoryName}>
+                    {cat.categoryName}
+                  </MenuItem>
+                ))}
               </Select>
             </FormControl>
           </FlexBetween>
@@ -194,7 +238,10 @@ const MenuManagement = () => {
             }}
           >
             {[...Array(15).keys()].map((index) => (
-              <Card key={index} sx={{ width: 280, background: theme.palette.primary[400] }}>
+              <Card
+                key={index}
+                sx={{ width: 280, background: theme.palette.primary[400] }}
+              >
                 <Skeleton
                   sx={{ height: 180 }}
                   animation="wave"
@@ -233,7 +280,13 @@ const MenuManagement = () => {
         <Box
           sx={{
             display: "flex",
-            justifyContent:{xs:"center", sm:"center", md:"normal", lg:"normal", xl:"normal"},
+            justifyContent: {
+              xs: "center",
+              sm: "center",
+              md: "normal",
+              lg: "normal",
+              xl: "normal",
+            },
             flexWrap: "wrap",
             gap: "1em",
             margin: "1.5em",

@@ -6,7 +6,7 @@ import SupplyDelivery from "../models/SupplyDelivery.js";
 
 export const createEOD = async (req, res) => {
   try {
-    const { date, startCash } = req.body;
+    const { date, cashierName, startCash } = req.body;
 
     const orderSales = await OrderSale.find();
     const refund = await Refund.find();
@@ -59,6 +59,7 @@ export const createEOD = async (req, res) => {
 
     const newEOD = new EOD({
       date,
+      cashierName,
       startCash,
       grossSales: grossSales,
       totalDiscounts: totalDiscounts,
@@ -89,7 +90,66 @@ export const getEOD = async (req, res) => {
     res.status(404).json({ message: err.message });
   }
 };
+export const getEODByMonth = async (req, res) => {
+  try {
+    const { month } = req.query;
+    const startDate = new Date();
+    startDate.setMonth(month - 1); 
+    startDate.setDate(1);
+    startDate.setHours(0, 0, 0, 0);
 
+    const endDate = new Date(startDate);
+    endDate.setMonth(startDate.getMonth() + 1);
+    endDate.setDate(0);
+    endDate.setHours(23, 59, 59, 999);
+
+    const eod = await EOD.find({
+      createdAt: { $gte: startDate, $lte: endDate }
+    });
+
+    res.status(200).json(eod);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
+
+export const getCashierReport = async (req, res) => {
+  try {
+    const currentDate = new Date();
+    currentDate.setHours(0, 0, 0, 0);
+
+    const endOfDay = new Date(currentDate);
+    endOfDay.setHours(23, 59, 59, 999);
+
+    const orderSales = await OrderSale.find({
+      createdAt: { $gte: currentDate, $lt: endOfDay }
+    });
+
+    const refunds = await Refund.find({
+      createdAt: { $gte: currentDate, $lt: endOfDay }
+    });
+
+    const expenses = await SupplyDelivery.find({
+      createdAt: { $gte: currentDate, $lt: endOfDay }
+    });
+
+    const totalAmountDiscounted = orderSales.reduce((total, sale) => total + sale.amountDiscounted, 0);
+
+    const totalRefundsAmount = refunds.reduce((total, refund) => total + refund.totalRefund, 0);
+
+    const totalExpenses = expenses.reduce((total, expenses) => total + expenses.subTotal, 0);
+
+    const currentReport = {
+      totalAmountDiscounted,
+      totalRefundsAmount,
+      totalExpenses,
+    };
+
+    res.status(200).json(currentReport);
+  } catch (err) {
+    res.status(404).json({ message: err.message });
+  }
+};
 export const getHighestSold = async (req, res) => {
   try {
     const menu = await MenuInventory.find();

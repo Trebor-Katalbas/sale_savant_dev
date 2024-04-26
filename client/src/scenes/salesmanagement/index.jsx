@@ -5,8 +5,7 @@ import {
   DialogActions,
   DialogContent,
   DialogTitle,
-  Grid,
-  TextField,
+  Divider,
   Toolbar,
   Tooltip,
   Typography,
@@ -25,73 +24,13 @@ const SalesManagement = () => {
   const navigate = useNavigate();
   const isDesktop = useMediaQuery(theme.breakpoints.up("md"));
   const [totalSale, setTotalSale] = useState([]);
+  const [currentStartCash, setCurrentStartCash] = useState([]);
   const [eod, setEOD] = useState([]);
+  const [eodByMonth, setEODByMonth] = useState([]);
   const [selectedItemId, setSelectedItemId] = useState(null);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-  const [cashDialogOpen, setCashDialogOpen] = useState(false);
-  const [startCash, setStartCash] = useState(() => {
-    const storedStartCash = localStorage.getItem("startCash");
-    return storedStartCash ? parseFloat(storedStartCash) : 0;
-  });
-  const [coinQuantities, setCoinQuantities] = useState(() => {
-    const storedCoinQuantities = JSON.parse(
-      localStorage.getItem("coinQuantities")
-    );
-    return (
-      storedCoinQuantities || {
-        0.05: 0,
-        0.1: 0,
-        0.25: 0,
-        1: 0,
-        5: 0,
-        10: 0,
-        20: 0,
-        50: 0,
-        100: 0,
-        200: 0,
-        500: 0,
-        1000: 0,
-      }
-    );
-  });
-
-  useEffect(() => {
-    localStorage.setItem("startCash", startCash);
-    localStorage.setItem("coinQuantities", JSON.stringify(coinQuantities));
-  }, [startCash, coinQuantities]);
-
-  const handleInputChange = (denomination, event) => {
-    const value = event.target.value;
-    setCoinQuantities((prevState) => ({
-      ...prevState,
-      [denomination]: value === "" ? "" : parseInt(value),
-    }));
-  };
-
-  const calculateTotal = () => {
-    let total = startCash;
-    if (total === 0) {
-      Object.entries(coinQuantities).forEach(([denomination, quantity]) => {
-        total += denomination * quantity;
-      });
-    }
-    return total;
-  };
-
-  const handleCashDialogConfirm = () => {
-    const totalCash = calculateTotal();
-    setStartCash(totalCash);
-    setCashDialogOpen(false);
-    console.log("Start cash and coin quantities:", startCash, coinQuantities);
-  };
 
   const handleClickLink = (link) => navigate(link);
-
-  useEffect(() => {
-    localStorage.setItem("startCash", startCash);
-  }, [startCash]);
-
-  console.log(eod);
 
   const fetchEOD = async () => {
     try {
@@ -112,6 +51,50 @@ const SalesManagement = () => {
   };
   useEffect(() => {
     fetchEOD();
+  }, []);
+
+  const fetchEODByMonth = async (month) => {
+    try {
+      const response = await fetch(`${baseUrl}home/get-eod-by-month?month=${month}`);
+      if (response.ok) {
+        const data = await response.json();
+        const eodWithId = data.map((item, index) => ({
+          ...item,
+          id: index + 1,
+        }));
+        setEODByMonth(eodWithId);
+      } else {
+        console.error("Failed to fetch eod data:", response.statusText);
+      }
+    } catch (error) {
+      console.error("An error occurred during the fetch:", error);
+    }
+  };
+
+  useEffect(() => {
+    const currentDate = new Date();
+    const currentMonth = currentDate.getMonth() + 1;
+    fetchEODByMonth(currentMonth);
+  }, []);
+
+  const fetchCurrentStartingCash = async () => {
+    try {
+      const response = await fetch(
+        `${baseUrl}sales-management/get-current-startcash`
+      );
+      if (response.ok) {
+        const data = await response.json();
+        setCurrentStartCash(data);
+      } else {
+        console.error("Failed to fetch data:", response.statusText);
+      }
+    } catch (error) {
+      console.error("An error occurred during the fetch:", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchCurrentStartingCash();
   }, []);
 
   useEffect(() => {
@@ -142,22 +125,6 @@ const SalesManagement = () => {
 
     return () => clearInterval(intervalId);
   }, []);
-
-  const handleCashDialogOpen = () => {
-    setCashDialogOpen(true);
-  };
-
-  const handleCashDialogClose = () => {
-    setCashDialogOpen(false);
-  };
-
-  const handleClearCash = () => {
-    setStartCash(0);
-    setCoinQuantities(
-      Object.fromEntries(Object.keys(coinQuantities).map((key) => [key, 0]))
-    );
-    setCashDialogOpen(false);
-  };
 
   const handleDelete = (_id) => {
     setDeleteDialogOpen(true);
@@ -204,29 +171,84 @@ const SalesManagement = () => {
     {
       field: "date",
       headerName: "Date",
-      width: 180,
+      width: 100,
       renderCell: (params) => {
         const date = new Date(params.row.date);
         const formattedDate = `${(date.getMonth() + 1)
           .toString()
-          .padStart(2, "0")}/${date
-          .getDate()
-          .toString()
-          .padStart(2, "0")}/${date.getFullYear()}`;
+          .padStart(2, "0")}/${date.getDate().toString().padStart(2, "0")}/${date.getFullYear()}`;
         return <div>{formattedDate}</div>;
       },
     },
-    { field: "startCash", headerName: "Starting Cash", width: 180 },
-    { field: "grossSales", headerName: "Gross Sales (Php)", width: 180 },
+    {
+      field: "divider",
+      headerName: "",
+      width: 10,
+      sortable: false,
+      renderCell: () => <Divider orientation="vertical" sx={{ marginLeft: "2em" }} />,
+    },
+    { field: "cashierName", headerName: "Cashier Name", width: 210 },
+    { field: "startCash", headerName: "Starting Cash", width: 120 },
+    {
+      field: "divider",
+      headerName: "",
+      width: 10,
+      sortable: false,
+      renderCell: () => <Divider orientation="vertical" sx={{ marginLeft: "2em" }} />,
+    },
+    { field: "grossSales", headerName: "Gross Sales (Php)", width: 120 },
     {
       field: "totalDiscounts",
       headerName: "Total Discounts (Php)",
       width: 180,
+      headerAlign: "center",
+      renderCell: (params) => (
+        <Typography color={theme.palette.secondary[400]}>{params.value}</Typography>
+      ),
     },
-    { field: "refunds", headerName: "Refunds (Php)", width: 180 },
-    { field: "netSales", headerName: "Net Sales (Php)", width: 180 },
-    { field: "expenses", headerName: "Expenses (Php)", width: 180 },
-    { field: "grossIncome", headerName: "Gross Income (Php)", width: 180 },
+    {
+      field: "refunds",
+      headerName: "Refunds (Php)",
+      width: 120,
+      headerAlign: "center",
+      renderCell: (params) => (
+        <Typography color={theme.palette.secondary[400]}>{params.value}</Typography>
+      ),
+    },
+    {
+      field: "netSales",
+      headerName: "Net Sales (Php)",
+      width: 150,
+      headerAlign: "center",
+      renderCell: (params) => (
+        <Typography color="#007C39">{params.value}</Typography>
+      ),
+    },
+    {
+      field: "expenses",
+      headerName: "Expenses (Php)",
+      width: 150,
+      headerAlign: "center",
+      renderCell: (params) => (
+        <Typography color={theme.palette.secondary[400]}>{params.value}</Typography>
+      ),
+    },
+    {
+      field: "grossIncome",
+      headerName: "Gross Income (Php)",
+      width: 150,
+      headerAlign: "center",
+      renderCell: (params) => (
+        <Typography color="#007C39">{params.value}</Typography>
+      ),
+    },
+    {
+      field: "divider",
+      headerName: "",
+      width: 20,
+      sortable: false,
+      renderCell: () => <Divider orientation="vertical" sx={{ marginLeft: "2em" }} />,
+    },
     {
       field: "action",
       headerName: "Action",
@@ -235,11 +257,7 @@ const SalesManagement = () => {
         <div style={{ display: "flex", gap: "1em" }}>
           <DeleteForeverIcon
             onClick={() => handleDelete(params.row._id)}
-            sx={{
-              color: theme.palette.secondary[400],
-              cursor: "pointer",
-              fontSize: "2.5em",
-            }}
+            sx={{ color: theme.palette.secondary[400], cursor: "pointer", fontSize: "2.5em" }}
           />
         </div>
       ),
@@ -309,7 +327,7 @@ const SalesManagement = () => {
             sx={{ background: theme.palette.secondary[700] }}
           >
             <LineSalesChart
-              data={eod.map((item) => ({
+              data={eodByMonth.map((item) => ({
                 x: formatDate(item.date),
                 y: item.grossSales,
               }))}
@@ -339,29 +357,17 @@ const SalesManagement = () => {
             flexDirection: { xs: "column", sm: "row", md: "row", lg: "row" },
           }}
         >
-          <Box display="flex" gap="1em">
-            <Tooltip title="This button adds End of Day (EoD) data">
-              <Button
-                variant="contained"
-                color="success"
-                onClick={() =>
-                  handleClickLink(`/add eod/start-cash/${startCash}`)
-                }
-              >
-                Add EoD
-              </Button>
-            </Tooltip>
+          <Tooltip title="This button adds End of Day (EoD) data">
             <Button
               variant="contained"
               color="success"
-              onClick={handleCashDialogOpen}
+              onClick={() => handleClickLink(`/add eod`)}
             >
-              Add Start Cash
+              Add EoD
             </Button>
-          </Box>
-
-          <Typography whiteSpace="nowrap">
-            Starting Cash:{" "}
+          </Tooltip>
+          <Typography variant="h6">
+            Starting Cash(Today):{" "}
             <span
               style={{
                 background: theme.palette.secondary[800],
@@ -369,7 +375,9 @@ const SalesManagement = () => {
                 padding: "0.5em",
               }}
             >
-              Php {startCash}
+              {currentStartCash.startCash > 0
+                ? `Php ${currentStartCash.startCash}`
+                : "No Starting Cash Recorded"}
             </span>
           </Typography>
         </FlexBetween>
@@ -416,51 +424,6 @@ const SalesManagement = () => {
           />
         </Box>
       </Box>
-
-      <Dialog open={cashDialogOpen} onClose={handleCashDialogClose}>
-        <DialogTitle sx={{ background: theme.palette.primary[700] }}>
-          Starting Cash
-        </DialogTitle>
-        <DialogContent sx={{ background: theme.palette.primary[700] }}>
-          <Typography variant="subtitle1" marginBottom="1em">
-            Enter Coins/Bills Quantity:
-          </Typography>
-          <Grid container spacing={2}>
-            {Object.entries(coinQuantities).map(([denomination, quantity]) => (
-              <Grid item xs={6} sm={4} md={3} key={denomination}>
-                <TextField
-                  color="secondary"
-                  label={`${denomination} Peso(s)`}
-                  type="number"
-                  value={quantity}
-                  onChange={(e) => handleInputChange(denomination, e)}
-                />
-              </Grid>
-            ))}
-          </Grid>
-          <Box mb={2} marginTop="2em">
-            <TextField
-              color="secondary"
-              label="Total Starting Cash"
-              type="number"
-              value={calculateTotal().toFixed(2)}
-              fullWidth
-            />
-          </Box>
-        </DialogContent>
-        <DialogActions sx={{ background: theme.palette.primary[700] }}>
-          <Button onClick={handleClearCash} color="error" variant="outlined">
-            Reset
-          </Button>
-          <Button
-            onClick={handleCashDialogConfirm}
-            color="success"
-            variant="contained"
-          >
-            Confirm
-          </Button>
-        </DialogActions>
-      </Dialog>
 
       <Dialog open={deleteDialogOpen} onClose={handleCancelDelete}>
         <DialogTitle>Delete Confirmation</DialogTitle>

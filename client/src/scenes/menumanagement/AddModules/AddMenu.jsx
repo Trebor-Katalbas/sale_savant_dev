@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Box,
   Button,
@@ -42,6 +42,29 @@ const AddMenu = () => {
   const navigate = useNavigate();
   const [openDialog, setOpenDialog] = useState(false);
   const [dialogMessage, setDialogMessage] = useState("");
+  const [category, setCategory] = useState([]);
+
+  const fetchCategory = async () => {
+    try {
+      const response = await fetch(`${baseUrl}menumanagement/getCategory`);
+      if (response.ok) {
+        const data = await response.json();
+        const categoryWithId = data.map((item, index) => ({
+          ...item,
+          id: index + 1,
+        }));
+        setCategory(categoryWithId);
+      } else {
+        console.error("Failed to fetch category:", response.statusText);
+      }
+    } catch (error) {
+      console.error("An error occurred during the fetch:", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchCategory();
+  }, []);
 
   const initialValues = {
     menuItem: "",
@@ -60,13 +83,10 @@ const AddMenu = () => {
     formData.append("picturePath", values.picture.name);
 
     try {
-      const response = await fetch(
-        `${baseUrl}menumanagement/addmenu`,
-        {
-          method: "POST",
-          body: formData,
-        }
-      );
+      const response = await fetch(`${baseUrl}menumanagement/addmenu`, {
+        method: "POST",
+        body: formData,
+      });
 
       if (response.ok) {
         console.log("Menu added successfully!");
@@ -132,9 +152,9 @@ const AddMenu = () => {
                   error={Boolean(touched.category) && Boolean(errors.category)}
                   helperText={touched.category && errors.category}
                 >
-                  {categories.map((category) => (
-                    <MenuItem key={category} value={category}>
-                      {category}
+                  {category.map((cat) => (
+                    <MenuItem key={cat.id} value={cat.categoryName}>
+                      {cat.categoryName}
                     </MenuItem>
                   ))}
                 </Field>
@@ -150,9 +170,7 @@ const AddMenu = () => {
                   fullWidth
                   InputProps={{
                     startAdornment: (
-                      <InputAdornment position="start">
-                        Php
-                      </InputAdornment>
+                      <InputAdornment position="start">Php</InputAdornment>
                     ),
                   }}
                   sx={{
@@ -179,7 +197,9 @@ const AddMenu = () => {
                     multiple={false}
                     onDrop={(acceptedFiles, rejectedFiles) => {
                       if (rejectedFiles && rejectedFiles.length > 0) {
-                        setDialogMessage("Please upload files with .jpg, .jpeg, or .png formats only.");
+                        setDialogMessage(
+                          "Please upload files with .jpg, .jpeg, or .png formats only."
+                        );
                         setOpenDialog(true);
                       } else {
                         setFieldValue("picture", acceptedFiles[0]);
@@ -267,11 +287,15 @@ const AddMenu = () => {
             </Form>
           )}
         </Formik>
-        
+
         <Dialog open={openDialog} onClose={() => setOpenDialog(false)}>
-          <DialogTitle color={theme.palette.secondary[400]}>File Format Error</DialogTitle>
+          <DialogTitle color={theme.palette.secondary[400]}>
+            File Format Error
+          </DialogTitle>
           <DialogContent>{dialogMessage}</DialogContent>
-          <Button onClick={() => setOpenDialog(false)} variant="contained">OK</Button>
+          <Button onClick={() => setOpenDialog(false)} variant="contained">
+            OK
+          </Button>
         </Dialog>
       </Box>
     </>

@@ -18,9 +18,13 @@ const AddSupplyDeliverSchema = Yup.object().shape({
   supplierName: Yup.string().required("Required"),
   itemName: Yup.string().required("Required"),
   quantity: Yup.number().required("Required"),
+  quantityUnit: Yup.string().required("Required"),
+  deliveryStatus: Yup.string().required("Required"),
   totalPaid: Yup.number().required("Required"),
   totalCost: Yup.number().required("Required"),
 });
+
+const unitOptions = ["pcs", "boxes", "kg", "g", "L", "mL"];
 
 const AddSupplyRecord = () => {
   const navigate = useNavigate();
@@ -33,6 +37,8 @@ const AddSupplyRecord = () => {
     supplierName: "",
     itemName: "",
     quantity: 0,
+    quantityUnit: "",
+    deliveryStatus: "",
     totalPaid: 0,
     totalCost: 0,
   };
@@ -43,9 +49,7 @@ const AddSupplyRecord = () => {
 
   const fetchSupplier = async () => {
     try {
-      const response = await fetch(
-        `${baseUrl}supply-management/get-supplier`
-      );
+      const response = await fetch(`${baseUrl}supply-management/get-supplier`);
       if (response.ok) {
         const data = await response.json();
         setSupplier(data);
@@ -127,7 +131,9 @@ const AddSupplyRecord = () => {
                   background: theme.palette.primary[700],
                   marginBottom: "1em",
                 }}
-                error={Boolean(touched.supplierName) && Boolean(errors.supplierName)}
+                error={
+                  Boolean(touched.supplierName) && Boolean(errors.supplierName)
+                }
                 helperText={touched.supplierName && errors.supplierName}
               >
                 {loading ? (
@@ -135,7 +141,7 @@ const AddSupplyRecord = () => {
                 ) : (
                   supplier.map((supplier, index) => (
                     <MenuItem key={index} value={supplier.supplierName}>
-                      {supplier.supplierName} {" "} {`(${supplier.category})`}
+                      {supplier.supplierName} {`(${supplier.category})`}
                     </MenuItem>
                   ))
                 )}
@@ -155,21 +161,63 @@ const AddSupplyRecord = () => {
                   error={Boolean(touched.itemName) && Boolean(errors.itemName)}
                   helperText={touched.itemName && errors.itemName}
                 />
+                <Box display="flex" gap="1.5em">
+                  <Field
+                    color="secondary"
+                    name="quantity"
+                    label="Quantity"
+                    onBlur={handleBlur}
+                    onChange={handleChange}
+                    value={values.quantity}
+                    as={TextField}
+                    type="number"
+                    fullWidth
+                    margin="normal"
+                    sx={{ background: theme.palette.primary[700] }}
+                    error={
+                      Boolean(touched.quantity) && Boolean(errors.quantity)
+                    }
+                    helperText={touched.quantity && errors.quantity}
+                  />
+                  <Field
+                    color="secondary"
+                    name="quantityUnit"
+                    label="Unit"
+                    onBlur={handleBlur}
+                    onChange={handleChange}
+                    value={values.quantityUnit}
+                    as={TextField}
+                    select
+                    fullWidth
+                    margin="normal"
+                    sx={{ background: theme.palette.primary[700] }}
+                  >
+                    {unitOptions.map((unit) => (
+                      <MenuItem key={unit} value={unit}>
+                        {unit}
+                      </MenuItem>
+                    ))}
+                  </Field>
+                </Box>
+              </Box>
+              <Box sx={{ margin: "2em", width: "60%" }}>
+                <InputLabel htmlFor="deliveryStatus">
+                  Delivery Status
+                </InputLabel>
                 <Field
-                  color="secondary"
-                  name="quantity"
-                  label="Quantity"
-                  onBlur={handleBlur}
-                  onChange={handleChange}
-                  value={values.quantity}
-                  as={TextField}
-                  type="number"
-                  fullWidth
-                  margin="normal"
-                  sx={{ background: theme.palette.primary[700] }}
-                  error={Boolean(touched.quantity) && Boolean(errors.quantity)}
-                  helperText={touched.quantity && errors.quantity}
-                />
+                  name="deliveryStatus"
+                  as="div"
+                  sx={{ marginTop: "0.5em", display: "flex", gap: "1em" }}
+                >
+                  <label>
+                    <Field type="radio" name="deliveryStatus" value="Partial Delivery" />
+                    Partial Delivery
+                  </label>
+                  <label>
+                    <Field type="radio" name="deliveryStatus" value="Full Delivery" />
+                    Full Delivery
+                  </label>
+                </Field>
               </Box>
               <Box display="flex" gap="1.5em">
                 <Field

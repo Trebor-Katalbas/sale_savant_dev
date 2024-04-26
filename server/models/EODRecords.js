@@ -6,6 +6,10 @@ const EODSchema = new mongoose.Schema(
       type: Date,
       required: true,
     },
+    cashierName:{
+      type: String,
+      required: true,
+    },
     startCash: {
       type: Number,
       required: true,

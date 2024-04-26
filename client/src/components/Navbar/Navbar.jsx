@@ -63,7 +63,7 @@ const Navbar = ({ user, isSidebarOpen, setIsSidebarOpen }) => {
         "& .MuiToolbar-root": {
           backgroundColor:
             theme.palette.mode === "dark"
-              ? theme.palette.primary[800]
+              ? theme.palette.primary[900]
               : theme.palette.primary[500],
         },
       }}

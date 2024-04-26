@@ -6,6 +6,7 @@ import { getNextSequenceValue } from "../models/Counter.js";
 import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
+import Category from "../models/Category.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -139,12 +140,38 @@ export const AddPromo = async (req, res) => {
     res.status(500).json({ error: error.message || "Internal Server Error" });
   }
 };
+export const AddCategory = async (req, res) => {
+  try {
+    const {
+      categoryName,
+    } = req.body;
+
+    const newCategory = new Category({
+      categoryName,
+    });
+
+    const savedCategory = await newCategory.save();
+
+    res.status(201).json(savedCategory);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: error.message || "Internal Server Error" });
+  }
+};
 
 // Get Function
 export const getMenu = async (req, res) => {
   try {
     const menu = await Menu.find();
     res.status(200).json(menu);
+  } catch (err) {
+    res.status(404).json({ message: err.message });
+  }
+};
+export const getCategory = async (req, res) => {
+  try {
+    const category = await Category.find();
+    res.status(200).json(category);
   } catch (err) {
     res.status(404).json({ message: err.message });
   }
@@ -309,6 +336,24 @@ export const deleteMenuLoss = async (req, res) => {
     await MenuLoss.findByIdAndDelete(id);
 
     res.status(200).json({ message: "Menu item deleted successfully" });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+};
+export const deleteCategory = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const existingItem = await Category.findById(id);
+
+    if (!existingItem) {
+      return res.status(404).json({ error: "Category not found" });
+    }
+
+    await Category.findByIdAndDelete(id);
+
+    res.status(200).json({ message: "Category deleted successfully" });
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: "Internal Server Error" });

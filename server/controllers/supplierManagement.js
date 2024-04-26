@@ -30,6 +30,8 @@ export const AddSupplyDelivery = async (req, res) => {
       deliveryDate,
       itemName,
       quantity,
+      quantityUnit,
+      deliveryStatus,
       totalPaid,
       totalCost,
     } = req.body;
@@ -50,6 +52,8 @@ export const AddSupplyDelivery = async (req, res) => {
       deliveryDate,
       itemName,
       quantity,
+      quantityUnit,
+      deliveryStatus,
       totalPaid,
       totalCost,
     });

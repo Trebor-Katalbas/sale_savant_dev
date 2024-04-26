@@ -41,19 +41,22 @@ const SupplyRecords = () => {
 
   const handleExportToExcel = () => {
     const exportData = supplyRecord.map((record) => ({
-      "Delivery Date": new Date(record.deliveryDate).toLocaleDateString("en-US", {
-        year: "numeric",
-        month: "2-digit",
-        day: "2-digit",
-      }),
+      "Delivery Date": new Date(record.deliveryDate).toLocaleDateString(
+        "en-US",
+        {
+          year: "numeric",
+          month: "2-digit",
+          day: "2-digit",
+        }
+      ),
       "Supplier Name": record.supplier[0].supplierName,
       "Contact Person": record.supplier[0].contactPerson,
       "Contact #": record.supplier[0].contactNo,
-      "Category": record.supplier[0].category,
+      Category: record.supplier[0].category,
       "Item Name": record.itemName,
-      "Quantity": record.quantity,
+      Quantity: record.quantity,
       "Total Cost (Php)": record.totalCost,
-      "Status": getStatusText(record.totalPaid, record.totalCost),
+      Status: getStatusText(record.totalPaid, record.totalCost),
     }));
 
     const ws = XLSX.utils.json_to_sheet(exportData);
@@ -216,15 +219,15 @@ const SupplyRecords = () => {
 
   const getStatus = (totalPaid, totalCost) => {
     if (totalPaid === 0) {
-        return { text: "- Unpaid -", color: "#B03021", font: "#fff" };
+      return { text: "- Unpaid -", color: "#B03021", font: "#fff" };
     } else if (totalPaid !== 0 && totalPaid < totalCost) {
-        return { text: "Partially Paid", color: "#E8F4B5", font: "#000" };
+      return { text: "Partially Paid", color: "#E8F4B5", font: "#000" };
     } else if (totalPaid === totalCost) {
-        return { text: "-- Paid --", color: "#00DB16", font: "#000" };
+      return { text: "-- Paid --", color: "#00DB16", font: "#000" };
     } else {
-        return { text: "Unknown", color: "#000", font: "#fff" }; // Handle other cases
+      return { text: "Unknown", color: "#000", font: "#fff" }; // Handle other cases
     }
-};
+  };
 
   const columns = [
     {
@@ -255,7 +258,7 @@ const SupplyRecords = () => {
     {
       field: "contactNo",
       headerName: "Contact #",
-      width: 120,
+      width: 100,
       valueGetter: (params) => params.row.supplier[0].contactNo,
     },
     {
@@ -273,9 +276,15 @@ const SupplyRecords = () => {
       width: 160,
       valueGetter: (params) => params.row.supplier[0].category,
     },
-    { field: "itemName", headerName: "Item Name", width: 160 },
-    { field: "quantity", headerName: "Quantity", width: 100 },
-    { field: "totalCost", headerName: "Total Cost (Php)", width: 120 },
+    { field: "itemName", headerName: "Item Name", width: 140 },
+    { field: "quantity", headerName: "Quantity", width: 80 },
+    { field: "quantityUnit", headerName: "Unit", width: 80 },
+    {
+      field: "deliveryStatus",
+      headerName: "Delivery Status",
+      width: 120,
+    },
+    { field: "totalCost", headerName: "Total Cost (Php)", width: 100 },
     {
       field: "divider2",
       headerName: "",
@@ -405,7 +414,19 @@ const SupplyRecords = () => {
               </FlexBetween>
             </Container>
 
-            <FormControl color="secondary" sx={{display:"flex", width:{xs:"100%", sm:"100%", md:"auto", lg:"auto", xl:"auto",}}}>
+            <FormControl
+              color="secondary"
+              sx={{
+                display: "flex",
+                width: {
+                  xs: "100%",
+                  sm: "100%",
+                  md: "auto",
+                  lg: "auto",
+                  xl: "auto",
+                },
+              }}
+            >
               <InputLabel id="category-label">Category</InputLabel>
               <Select
                 value={selectedCategory}

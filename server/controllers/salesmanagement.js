@@ -1,7 +1,59 @@
 import OrderSales from "../models/OrderSales.js";
 import Refund from "../models/Refunds.js";
+import StartCash from "../models/StartCash.js";
+
+// Add
+export const addStartCash = async (req, res) => {
+  try {
+    const { userName, startCash } = req.body;
+
+    const newStartCash = new StartCash({
+      userName,
+      startCash,
+    });
+
+    const savedStartCash = await newStartCash.save();
+
+    res.status(201).json(savedStartCash);
+  } catch (err) {
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+};
 
 // Get
+export const getStartCash = async (req, res) => {
+  try {
+    const startCash = await StartCash.find();
+    if (!startCash) {
+      return res.status(404).json({ message: "start cash not found" });
+    }
+    res.status(200).json(startCash);
+  } catch (err) {
+    res.status(404).json({ message: err.message });
+  }
+};
+export const getCurrentStartCash = async (req, res) => {
+  try {
+    const currentDate = new Date();
+    currentDate.setHours(0, 0, 0, 0);
+
+    const endOfDay = new Date(currentDate);
+    endOfDay.setHours(23, 59, 59, 999);
+
+    let startCash = await StartCash.findOne({
+      createdAt: { $gte: currentDate, $lt: endOfDay },
+    });
+
+    if (!startCash) {
+      startCash = { startCash: 0 };
+    }
+
+    res.status(200).json(startCash);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
+
 export const getOrderSale = async (req, res) => {
   try {
     const orderSale = await OrderSales.find();
@@ -98,7 +150,25 @@ export const deleteOrderSale = async (req, res) => {
       .status(200)
       .json({ message: `Supplier ${orderSale._id} deleted successfully` });
   } catch (error) {
-    console.error("Error deleting order sale:", error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+};
+export const deleteStartCash = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const startCash = await StartCash.findById(id);
+
+    if (!startCash) {
+      return res.status(404).json({ error: "Start Cash not found" });
+    }
+
+    await StartCash.findByIdAndDelete(id);
+
+    res
+      .status(200)
+      .json({ message: `Record ${startCash._id} deleted successfully` });
+  } catch (error) {
     res.status(500).json({ error: "Internal Server Error" });
   }
 };

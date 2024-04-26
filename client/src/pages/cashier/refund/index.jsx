@@ -166,6 +166,12 @@ const Refunds = () => {
             >
               Refunds
             </Button>
+            <Button
+              variant="contained"
+              onClick={() => handleButtonClick("/cashier-reports")}
+            >
+              Reports
+            </Button>
           </div>
 
           <FlexBetween

@@ -15,6 +15,7 @@ import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
 import ProductionQuantityLimitsIcon from "@mui/icons-material/ProductionQuantityLimits";
 import RestaurantMenuIcon from "@mui/icons-material/RestaurantMenu";
 import TableRestaurantIcon from "@mui/icons-material/TableRestaurant";
+import DescriptionIcon from '@mui/icons-material/Description';
 import * as image from "assets/index.js";
 import React, { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -40,6 +41,7 @@ const NewOrder = () => {
     },
     { icon: <ProductionQuantityLimitsIcon />, name: "Refunds" },
     { icon: <TableRestaurantIcon />, name: "Modify Table" },
+    { icon: <DescriptionIcon />, name: "Reports" }
   ];
 
   useEffect(() => {
@@ -74,6 +76,9 @@ const NewOrder = () => {
         break;
       case "Modify Table":
         navigate("/modify-table");
+        break;
+      case "Reports":
+        navigate("/cashier-reports");
         break;
       default:
         break;

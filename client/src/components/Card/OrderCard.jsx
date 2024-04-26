@@ -118,7 +118,9 @@ const OrderCard = ({
   };
 
   const handleAddQuantity = () => {
-    setQuantity(quantity + 1);
+    if (salesTarget !== quantity) {
+      setQuantity(quantity + 1);
+    }
   };
 
   const handleRemoveQuantity = () => {

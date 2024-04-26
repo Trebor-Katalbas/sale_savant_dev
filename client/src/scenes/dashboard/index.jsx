@@ -6,6 +6,7 @@ import { baseUrl } from "state/api";
 const Dashboard = () => {
   const theme = useTheme();
   const [eod, setEOD] = useState([]);
+  const [eodByMonth, setEODByMonth] = useState([]);
   const [sold, setNoSold] = useState([]);
   const isNonMediumScreens = useMediaQuery("(min-width: 1200px)");
   console.log(sold);
@@ -29,6 +30,30 @@ const Dashboard = () => {
   };
   useEffect(() => {
     fetchEOD();
+  }, []);
+
+  const fetchEODByMonth = async (month) => {
+    try {
+      const response = await fetch(`${baseUrl}home/get-eod-by-month?month=${month}`);
+      if (response.ok) {
+        const data = await response.json();
+        const eodWithId = data.map((item, index) => ({
+          ...item,
+          id: index + 1,
+        }));
+        setEODByMonth(eodWithId);
+      } else {
+        console.error("Failed to fetch eod data:", response.statusText);
+      }
+    } catch (error) {
+      console.error("An error occurred during the fetch:", error);
+    }
+  };
+
+  useEffect(() => {
+    const currentDate = new Date();
+    const currentMonth = currentDate.getMonth() + 1;
+    fetchEODByMonth(currentMonth);
   }, []);
 
   const fetchNoSold = async () => {
@@ -68,8 +93,9 @@ const Dashboard = () => {
     .toString()
     .padStart(2, "0")}/${date.getFullYear()}`;
 
-  // Check if eod has elements before accessing latestEod
   const latestEod = eod.length > 0 ? eod.slice(-1)[0] : {};
+
+  console.log(latestEod)
 
   return (
     <>
@@ -95,7 +121,7 @@ const Dashboard = () => {
           >
             <StatBox
               title={"Net Sales"}
-              value={`Php ${latestEod.netSales || 0}`} // Provide a default value if netSales is undefined
+              value={`Php ${latestEod.netSales || 0}`} 
               date={formattedDate}
               width="100%"
               height={{
@@ -109,7 +135,7 @@ const Dashboard = () => {
             />
             <StatBox
               title={"Income"}
-              value={`Php ${latestEod.grossIncome || 0}`} // Provide a default value if grossIncome is undefined
+              value={`Php ${latestEod.grossIncome || 0}`} 
               date={formattedDate}
               width="100%"
               height={{
@@ -132,7 +158,7 @@ const Dashboard = () => {
           >
             <StatBox
               title={"Expenses"}
-              value={`Php ${latestEod.expenses || 0}`} // Provide a default value if expenses is undefined
+              value={`Php ${latestEod.expenses || 0}`} 
               date={formattedDate}
               width="100%"
               height={{
@@ -146,7 +172,7 @@ const Dashboard = () => {
             />
             <StatBox
               title={"Refunds"}
-              value={`Php ${latestEod.refunds || 0}`} // Provide a default value if refunds is undefined
+              value={`Php ${latestEod.refunds || 0}`} 
               date={formattedDate}
               width="100%"
               height={{
@@ -174,7 +200,7 @@ const Dashboard = () => {
             sx={{ background: theme.palette.secondary[700] }}
           >
             <LineSalesChart
-              data={eod.map((item) => ({
+              data={eodByMonth.map((item) => ({
                 x: formatDate(item.date),
                 y: item.grossSales,
               }))}

@@ -13,6 +13,7 @@ export {default as AddPromo} from './menumanagement/AddModules/AddPromo.jsx'
 export {default as EditMenu} from './menumanagement/EditModules/EditMenu.jsx'
 export {default as EditInventory} from './menumanagement/EditModules/EditInventory.jsx'
 export {default as EditMenuLoss} from './menumanagement/EditModules/EditLoss.jsx'
+export {default as AddCategory} from './menumanagement/AddModules/AddCategory.jsx'
 
 // exports for Supply and Purchase Management
 export {default as SupplyRecords} from './supplymanagement/SupplyRecords.jsx'

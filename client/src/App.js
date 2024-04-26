@@ -35,6 +35,7 @@ function App() {
               <Route path="/add menu" element={<scenes.AddMenu />} />
               <Route path="/add loss" element={<scenes.AddLoss/>} />
               <Route path="/add promo" element={<scenes.AddPromo/>} />
+              <Route path="/add category" element={<scenes.AddCategory />} />
               <Route path={`/edit menu/:id`} element={<scenes.EditMenu />} />
               <Route path={`/edit inventory/:id`} element={<scenes.EditInventory />} />
               <Route path={`/edit loss/:id`} element={<scenes.EditMenuLoss/>} />
@@ -53,7 +54,7 @@ function App() {
               <Route path="/sales management/expenses" element={<scenes.Expenses />} />
               <Route path="/sales management/refund-records" element={<scenes.RefundRecords />} />
               {/* Modules */}
-              <Route path={`/add eod/start-cash/:id`}element={<scenes.AddEOD />} />
+              <Route path={`/add eod`}element={<scenes.AddEOD />} />
 
               {/* Account Management Routes */}
               <Route path="/account management" element={<scenes.AccountManagement/>} />
@@ -89,6 +90,10 @@ function App() {
               {/* Refunds */}
               <Route path="/refunds" element={<pages.Refunds />} />
 
+              {/* Reports */}
+              <Route path="/cashier-reports" element={<pages.CashierReports />}/>
+              <Route path="/add-startcash" element={<pages.AddStartCash /> } />
+              
             </Route>
             
           </Routes>

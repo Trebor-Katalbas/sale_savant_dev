@@ -54,6 +54,7 @@ const OrderMenu = (props) => {
   const [savedPromos, setSavedPromos] = useState(false);
   const [selectedPromos, setSelectedPromos] = useState([]);
   const [discountedAmount, setDiscountedAmount] = useState([]);
+  const [category, setCategory] = useState([]);
   const { window } = props;
   const OrderType = getOrderType();
   const OrderNo = getOrderNo();
@@ -64,12 +65,32 @@ const OrderMenu = (props) => {
     }
   }, [OrderType]);
 
+  const fetchCategory = async () => {
+    try {
+      const response = await fetch(`${baseUrl}menumanagement/getCategory`);
+      if (response.ok) {
+        const data = await response.json();
+        const categoryWithId = data.map((item, index) => ({
+          ...item,
+          id: index + 1,
+        }));
+        setCategory(categoryWithId);
+      } else {
+        console.error("Failed to fetch category:", response.statusText);
+      }
+    } catch (error) {
+      console.error("An error occurred during the fetch:", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchCategory();
+  }, []);
+
   useEffect(() => {
     const fetchMenuData = async () => {
       try {
-        const response = await fetch(
-          `${baseUrl}menumanagement/menu`
-        );
+        const response = await fetch(`${baseUrl}menumanagement/menu`);
         if (response.ok) {
           const data = await response.json();
           setMenuData(data);
@@ -87,9 +108,7 @@ const OrderMenu = (props) => {
   useEffect(() => {
     const fetchMenuPromos = async () => {
       try {
-        const response = await fetch(
-          `${baseUrl}menumanagement/menuPromo`
-        );
+        const response = await fetch(`${baseUrl}menumanagement/menuPromo`);
         if (response.ok) {
           const data = await response.json();
           const menuPromoWithId = data.map((item, index) => ({
@@ -264,16 +283,13 @@ const OrderMenu = (props) => {
         return table;
       });
 
-      const response = await fetch(
-        `${baseUrl}cashier/update-table-status`,
-        {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(updatedTables),
-        }
-      );
+      const response = await fetch(`${baseUrl}cashier/update-table-status`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(updatedTables),
+      });
 
       if (response.ok) {
         console.log("Table status updated successfully");
@@ -371,16 +387,13 @@ const OrderMenu = (props) => {
     console.log(orderDetails);
 
     try {
-      const response = await fetch(
-        `${baseUrl}cashier/create-receipt`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(orderDetails),
-        }
-      );
+      const response = await fetch(`${baseUrl}cashier/create-receipt`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(orderDetails),
+      });
 
       if (response.ok) {
         console.log("Order submitted successfully");
@@ -836,11 +849,11 @@ const OrderMenu = (props) => {
                       }}
                     >
                       <MenuItem value="All">All</MenuItem>
-                      <MenuItem value="Main Dish">Main Dish</MenuItem>
-                      <MenuItem value="Tausug Dish">Tausug Dish</MenuItem>
-                      <MenuItem value="Dessert">Dessert</MenuItem>
-                      <MenuItem value="Tausug Dessert">Tausug Dessert</MenuItem>
-                      <MenuItem value="Drinks">Drinks</MenuItem>
+                      {category.map((cat) => (
+                        <MenuItem key={cat.id} value={cat.categoryName}>
+                          {cat.categoryName}
+                        </MenuItem>
+                      ))}
                     </Select>
                   </FormControl>
                 </Box>
