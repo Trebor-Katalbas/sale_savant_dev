@@ -1,16 +1,11 @@
-import React from "react";
-import {
-  Box,
-  Button,
-  InputLabel,
-  TextField,
-  useTheme,
-} from "@mui/material";
+import React, { useState } from "react";
+import { Box, Button, InputLabel, TextField, Typography, useTheme } from "@mui/material";
 import { Formik, Field, Form } from "formik";
 import * as Yup from "yup";
 import { Header } from "components";
 import { Link, useNavigate } from "react-router-dom";
 import { baseUrl } from "state/api";
+import TaskAltIcon from "@mui/icons-material/TaskAlt";
 
 const AddSupplierSchema = Yup.object().shape({
   supplierName: Yup.string().required("Required"),
@@ -23,6 +18,7 @@ const AddSupplierSchema = Yup.object().shape({
 const AddSupplier = () => {
   const navigate = useNavigate();
   const theme = useTheme();
+  const [successModalOpen, setSuccessModalOpen] = useState(false);
 
   const initialValues = {
     supplierName: "",
@@ -34,20 +30,21 @@ const AddSupplier = () => {
 
   const handleSubmit = async (values) => {
     try {
-      const response = await fetch(
-        `${baseUrl}supply-management/add-supplier`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(values),
-        }
-      );
+      const response = await fetch(`${baseUrl}supply-management/add-supplier`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(values),
+      });
 
       if (response.ok) {
         console.log("Supplier added successfully!");
-        navigate("/supply and purchase management/supplier-management");
+        setSuccessModalOpen(true);
+        setTimeout(() => {
+          setSuccessModalOpen(false);
+          navigate("/supply and purchase management/supplier-management");
+        }, 1500);
       } else {
         console.error("Failed to add supplier:", response.statusText);
       }
@@ -77,6 +74,7 @@ const AddSupplier = () => {
                   onBlur={handleBlur}
                   onChange={handleChange}
                   value={values.supplierName}
+                  placeholder="Enter Supplier/Company Name"
                   as={TextField}
                   fullWidth
                   sx={{
@@ -97,6 +95,7 @@ const AddSupplier = () => {
                   onBlur={handleBlur}
                   onChange={handleChange}
                   value={values.contactPerson}
+                  placeholder="e.g. Dela Cruz, Juan"
                   as={TextField}
                   fullWidth
                   sx={{
@@ -115,6 +114,7 @@ const AddSupplier = () => {
                   onBlur={handleBlur}
                   onChange={handleChange}
                   value={values.category}
+                  placeholder="e.g. Poultries, Meat, Beverages"
                   as={TextField}
                   fullWidth
                   sx={{
@@ -190,6 +190,32 @@ const AddSupplier = () => {
           )}
         </Formik>
       </Box>
+
+      {successModalOpen && (
+        <Box
+          sx={{
+            position: "fixed",
+            top: "50%",
+            left: "50%",
+            transform: "translate(-50%, -50%)",
+            backgroundColor: "rgba(255, 255, 255, 0.8)",
+            padding: "1em",
+            borderRadius: "10px",
+            color:'green',
+            border:'solid 1px green'
+          }}
+        >
+          <Typography
+            variant="h3"
+            display="flex"
+            alignItems="center"
+            gap="0.5em"
+          >
+            <TaskAltIcon sx={{ fontSize: "1.5em" }} />
+            Successfully Added
+          </Typography>
+        </Box>
+      )}
     </>
   );
 };

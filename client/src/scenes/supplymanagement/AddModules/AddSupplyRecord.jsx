@@ -8,6 +8,7 @@ import {
   Radio,
   RadioGroup,
   TextField,
+  Typography,
   useTheme,
 } from "@mui/material";
 import { Formik, Field, Form } from "formik";
@@ -15,16 +16,25 @@ import * as Yup from "yup";
 import { Header } from "components";
 import { Link, useNavigate } from "react-router-dom";
 import { baseUrl } from "state/api";
+import TaskAltIcon from "@mui/icons-material/TaskAlt";
 
 const AddSupplyDeliverSchema = Yup.object().shape({
   deliverDate: Yup.date().required("Required"),
   supplierName: Yup.string().required("Required"),
   itemName: Yup.string().required("Required"),
-  quantity: Yup.number().required("Required"),
+  quantity: Yup.number()
+    .required("Required")
+    .positive("Quantity must not be a negative number")
+    .test("is-not-zero", "Quantity cannot be zero", (value) => value > 0),
   quantityUnit: Yup.string().required("Required"),
   deliveryStatus: Yup.string().required("Required"),
-  totalPaid: Yup.number().required("Required"),
-  totalCost: Yup.number().required("Required"),
+  totalPaid: Yup.number()
+    .required("Required")
+    .min(0, "Number of sold items must not be a negative number"),
+  totalCost: Yup.number()
+    .required("Required")
+    .positive("Total Cost must not be a negative number")
+    .test("is-not-zero", "Total Cost cannot be zero", (value) => value > 0),
 });
 
 const unitOptions = ["pcs", "boxes", "trays", "kg", "g", "L", "mL"];
@@ -33,6 +43,7 @@ const AddSupplyRecord = () => {
   const navigate = useNavigate();
   const theme = useTheme();
   const [supplier, setSupplier] = useState([]);
+  const [successModalOpen, setSuccessModalOpen] = useState(false);
   const [loading, setLoading] = useState(true);
 
   const initialValues = {
@@ -81,7 +92,11 @@ const AddSupplyRecord = () => {
 
       if (response.ok) {
         console.log("Supply Record added successfully!");
-        navigate("/supply and purchase management/supply-records");
+        setSuccessModalOpen(true);
+        setTimeout(() => {
+          setSuccessModalOpen(false);
+          navigate("/supply and purchase management/supply-records");
+        }, 1500);
       } else {
         console.error("Failed to add supplier:", response.statusText);
       }
@@ -299,6 +314,32 @@ const AddSupplyRecord = () => {
           </Form>
         )}
       </Formik>
+
+      {successModalOpen && (
+        <Box
+          sx={{
+            position: "fixed",
+            top: "50%",
+            left: "50%",
+            transform: "translate(-50%, -50%)",
+            backgroundColor: "rgba(255, 255, 255, 0.8)",
+            padding: "1em",
+            borderRadius: "10px",
+            color: "green",
+            border: "solid 1px green",
+          }}
+        >
+          <Typography
+            variant="h3"
+            display="flex"
+            alignItems="center"
+            gap="0.5em"
+          >
+            <TaskAltIcon sx={{ fontSize: "1.5em" }} />
+            Successfully Added
+          </Typography>
+        </Box>
+      )}
     </Box>
   );
 };

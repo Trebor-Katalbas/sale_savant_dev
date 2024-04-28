@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import {
+  Box,
   Button,
   Dialog,
   DialogActions,
@@ -7,11 +8,13 @@ import {
   DialogTitle,
   Grid,
   TextField,
+  Typography,
 } from "@mui/material";
 import { Formik, Field, Form } from "formik";
 import * as Yup from "yup";
 import { baseUrl } from "state/api";
 import { useSelector } from "react-redux";
+import TaskAltIcon from "@mui/icons-material/TaskAlt";
 
 const denominations = {
   "5 cents": 0.05,
@@ -31,6 +34,7 @@ const denominations = {
 
 const StartCashModal = ({ open, handleClose }) => {
   const user = useSelector((state) => state.global.user);
+  const [successModalOpen, setSuccessModalOpen] = useState(false);
 
   const validationSchema = Yup.object().shape({
     startCash: Yup.number().min(0).required(),
@@ -88,7 +92,11 @@ const StartCashModal = ({ open, handleClose }) => {
 
       if (response.ok) {
         console.log("Start Cash Added");
-        handleClose();
+        setSuccessModalOpen(true);
+        setTimeout(() => {
+          setSuccessModalOpen(false);
+          window.location.reload();
+        }, 1500);
       } else {
         console.error("Failed to add start cash:", response.statusText);
       }
@@ -167,6 +175,32 @@ const StartCashModal = ({ open, handleClose }) => {
           )}
         </Formik>
       </DialogContent>
+
+      {successModalOpen && (
+        <Box
+          sx={{
+            position: "fixed",
+            top: "50%",
+            left: "50%",
+            transform: "translate(-50%, -50%)",
+            backgroundColor: "rgba(255, 255, 255, 0.8)",
+            padding: "1em",
+            borderRadius: "10px",
+            color: "green",
+            border: "solid 1px green",
+          }}
+        >
+          <Typography
+            variant="h3"
+            display="flex"
+            alignItems="center"
+            gap="0.5em"
+          >
+            <TaskAltIcon sx={{ fontSize: "1.5em" }} />
+            Successfully Added
+          </Typography>
+        </Box>
+      )}
     </Dialog>
   );
 };

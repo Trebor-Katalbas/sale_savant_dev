@@ -7,6 +7,7 @@ import {
   ListSubheader,
   MenuItem,
   TextField,
+  Typography,
   useTheme,
 } from "@mui/material";
 import { Formik, Field, Form } from "formik";
@@ -14,29 +15,31 @@ import * as Yup from "yup";
 import { Header } from "components";
 import { Link, useNavigate } from "react-router-dom";
 import { baseUrl } from "state/api";
+import TaskAltIcon from "@mui/icons-material/TaskAlt";
 
 const AddInventorySchema = Yup.object().shape({
   dateTime: Yup.date().required("Required"),
   menuItem: Yup.string().required("Required"),
   category: Yup.string().required("Required"),
-  price: Yup.number().required("Required"),
-  salesTarget: Yup.number().required("Required"),
-  noSold: Yup.number().required("required"),
+  price: Yup.number()
+  .positive("Price must not be a negative number")
+  .required("Required")
+  .test('is-not-zero', 'Price cannot be zero', value => value > 0),
+  salesTarget: Yup.number()
+    .min(0, 'Sales target must not be a negative number')
+    .required("Required"),
+  noSold: Yup.number()
+    .min(0, 'Number of sold items must not be a negative number')
+    .required("Required"),
   description: Yup.string(),
 });
-
-const categories = [
-  "Main Dish",
-  "Tausug Dish",
-  "Dessert",
-  "Tausug Dessert",
-  "Drinks",
-];
 
 const AddInventory = () => {
   const navigate = useNavigate();
   const theme = useTheme();
   const [menuItems, setMenuItems] = useState([]);
+  const [category, setCategory] = useState([]);
+  const [successModalOpen, setSuccessModalOpen] = useState(false);
   // eslint-disable-next-line
   const [selectedMenuItem, setSelectedMenuItem] = useState("");
 
@@ -60,6 +63,28 @@ const AddInventory = () => {
     fetchMenuItems();
   }, []);
 
+  const fetchCategory = async () => {
+    try {
+      const response = await fetch(`${baseUrl}menumanagement/getCategory`);
+      if (response.ok) {
+        const data = await response.json();
+        const categoryWithId = data.map((item, index) => ({
+          ...item,
+          id: index + 1,
+        }));
+        setCategory(categoryWithId);
+      } else {
+        console.error("Failed to fetch category:", response.statusText);
+      }
+    } catch (error) {
+      console.error("An error occurred during the fetch:", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchCategory();
+  }, []);
+
   const handleMenuItemChange = async (value, setValues) => {
     const selectedMenu = menuItems.find((menu) => menu.menuItem === value);
 
@@ -74,11 +99,11 @@ const AddInventory = () => {
     setSelectedMenuItem(value);
   };
 
-  const groupedMenuItems = categories.reduce((acc, category) => {
+  const groupedMenuItems = category.reduce((acc, cat) => {
     const categoryItems = menuItems
-      .filter((menuItem) => menuItem.category === category)
+      .filter((menuItem) => menuItem.category === cat.categoryName)
       .sort((a, b) => a.menuItem.localeCompare(b.menuItem));
-    return { ...acc, [category]: categoryItems };
+    return { ...acc, [cat.categoryName]: categoryItems };
   }, {});
 
   const initialValues = {
@@ -106,7 +131,11 @@ const AddInventory = () => {
 
       if (response.ok) {
         console.log("Inventory added successfully!");
-        navigate("/menu inventory");
+        setSuccessModalOpen(true);
+        setTimeout(() => {
+          setSuccessModalOpen(false);
+          navigate("/menu inventory");
+        }, 1500);
       } else {
         console.error("Failed to add inventory:", response.statusText);
       }
@@ -209,9 +238,9 @@ const AddInventory = () => {
                   error={Boolean(touched.category) && Boolean(errors.category)}
                   helperText={touched.category && errors.category}
                 >
-                  {categories.map((category) => (
-                    <MenuItem key={category} value={category}>
-                      {category}
+                  {category.map((cat) => (
+                    <MenuItem key={cat.id} value={cat.categoryName}>
+                      {cat.categoryName}
                     </MenuItem>
                   ))}
                 </Field>
@@ -322,6 +351,32 @@ const AddInventory = () => {
           )}
         </Formik>
       </Box>
+
+      {successModalOpen && (
+        <Box
+          sx={{
+            position: "fixed",
+            top: "50%",
+            left: "50%",
+            transform: "translate(-50%, -50%)",
+            backgroundColor: "rgba(255, 255, 255, 0.8)",
+            padding: "1em",
+            borderRadius: "10px",
+            color:'green',
+            border:'solid 1px green'
+          }}
+        >
+          <Typography
+            variant="h3"
+            display="flex"
+            alignItems="center"
+            gap="0.5em"
+          >
+            <TaskAltIcon sx={{ fontSize: "1.5em" }} />
+            Successfully Added
+          </Typography>
+        </Box>
+      )}
     </>
   );
 };

@@ -286,7 +286,8 @@ const AddAccount = () => {
             backgroundColor: "rgba(255, 255, 255, 0.8)",
             padding: "1em",
             borderRadius: "10px",
-            color:'green'
+            color:'green',
+            border:'solid 1px green',
           }}
         >
           <Typography

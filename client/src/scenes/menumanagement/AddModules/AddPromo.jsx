@@ -15,34 +15,53 @@ import * as Yup from "yup";
 import { Header } from "components";
 import { Link, useNavigate } from "react-router-dom";
 import { baseUrl } from "state/api";
+import TaskAltIcon from "@mui/icons-material/TaskAlt";
 
 const AddPromoSchema = Yup.object().shape({
   promoName: Yup.string().required("Promo Name is required"),
   applicability: Yup.string().required("Promo Applicability is required"),
   promoType: Yup.string().required("Promo Type is required"),
   promoDesc: Yup.string(),
-  promoValue: Yup.number().required("Promo Value is required"),
+  promoValue: Yup.number().required("Promo Value is required").positive("Value must not be a negative number")
+  .required("Required")
+  .test('is-not-zero', 'Value cannot be zero', value => value > 0),
   validDate: Yup.date().required("Valid Date is required"),
 });
-
-const categories = [
-  "Main Dish",
-  "Tausug Dish",
-  "Dessert",
-  "Tausug Dessert",
-  "Drinks",
-];
 
 const AddPromo = () => {
   const navigate = useNavigate();
   const theme = useTheme();
   const [menuItems, setMenuItems] = useState([]);
+  const [category, setCategory] = useState([]);
+  const [successModalOpen, setSuccessModalOpen] = useState(false);
+
+  const fetchCategory = async () => {
+    try {
+      const response = await fetch(`${baseUrl}menumanagement/getCategory`);
+      if (response.ok) {
+        const data = await response.json();
+        const categoryWithId = data.map((item, index) => ({
+          ...item,
+          id: index + 1,
+        }));
+        setCategory(categoryWithId);
+      } else {
+        console.error("Failed to fetch category:", response.statusText);
+      }
+    } catch (error) {
+      console.error("An error occurred during the fetch:", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchCategory();
+  }, []);
 
   const handleChangePromoType = (e, setFieldValue, values) => {
     const { name, value } = e.target;
 
     const promoType =
-      value === "All Menu" || categories.includes(value)
+      value === "All Menu" || category.includes(value)
         ? "Percentage"
         : "Fixed";
 
@@ -70,11 +89,11 @@ const AddPromo = () => {
     fetchMenu();
   }, []);
 
-  const groupedMenuItems = categories.reduce((acc, category) => {
+  const groupedMenuItems = category.reduce((acc, cat) => {
     const categoryItems = menuItems
-      .filter((menuItem) => menuItem.category === category)
+      .filter((menuItem) => menuItem.category === cat.categoryName)
       .sort((a, b) => a.menuItem.localeCompare(b.menuItem));
-    return { ...acc, [category]: categoryItems };
+    return { ...acc, [cat.categoryName]: categoryItems };
   }, {});
 
   const initialValues = {
@@ -108,7 +127,11 @@ const AddPromo = () => {
 
       if (response.ok) {
         console.log("Promo added successfully!");
-        navigate("/menu promos");
+        setSuccessModalOpen(true);
+        setTimeout(() => {
+          setSuccessModalOpen(false);
+          navigate("/menu promos");
+        }, 1500);
       } else {
         console.error("Failed to add promo:", response.statusText);
       }
@@ -192,15 +215,15 @@ const AddPromo = () => {
                   <Divider />
                   {Object.entries(groupedMenuItems).map(([category, items]) => [
                     <MenuItem
-                      key={`category-${category}`}
-                      value={category}
+                      key={`category-${category.id}`}
+                      value={category.categoryName}
                       sx={{
                         background: theme.palette.primary[500],
                         color: theme.palette.secondary[400],
                         fontWeight: "bold",
                       }}
                     >
-                      {category}
+                      {category.categoryName}
                     </MenuItem>,
                     ...items.map((menuItem) => (
                       <MenuItem
@@ -374,6 +397,32 @@ const AddPromo = () => {
           )}
         </Formik>
       </Box>
+
+      {successModalOpen && (
+        <Box
+          sx={{
+            position: "fixed",
+            top: "50%",
+            left: "50%",
+            transform: "translate(-50%, -50%)",
+            backgroundColor: "rgba(255, 255, 255, 0.8)",
+            padding: "1em",
+            borderRadius: "10px",
+            color:'green',
+            border:'solid 1px green'
+          }}
+        >
+          <Typography
+            variant="h3"
+            display="flex"
+            alignItems="center"
+            gap="0.5em"
+          >
+            <TaskAltIcon sx={{ fontSize: "1.5em" }} />
+            Successfully Added
+          </Typography>
+        </Box>
+      )}
     </>
   );
 };

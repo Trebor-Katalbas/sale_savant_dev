@@ -19,11 +19,15 @@ import { FlexBetween, Header } from "components";
 import { Link, useNavigate } from "react-router-dom";
 import Dropzone from "react-dropzone";
 import { baseUrl } from "state/api";
+import TaskAltIcon from "@mui/icons-material/TaskAlt";
 
 const AddMenuSchema = Yup.object().shape({
   menuItem: Yup.string().required("Required"),
   category: Yup.string().required("Required"),
-  price: Yup.number().required("Required"),
+  price: Yup.number()
+    .positive("Price must not be a negative number")
+    .required("Required")
+    .test('is-not-zero', 'Price cannot be zero', value => value > 0),
   salesTarget: Yup.number().required("Required"),
   picture: Yup.string().required("required"),
   description: Yup.string(),
@@ -35,6 +39,7 @@ const AddMenu = () => {
   const [openDialog, setOpenDialog] = useState(false);
   const [dialogMessage, setDialogMessage] = useState("");
   const [category, setCategory] = useState([]);
+  const [successModalOpen, setSuccessModalOpen] = useState(false);
 
   const fetchCategory = async () => {
     try {
@@ -82,7 +87,12 @@ const AddMenu = () => {
 
       if (response.ok) {
         console.log("Menu added successfully!");
-        navigate("/menu management");
+        setSuccessModalOpen(true);
+        setTimeout(() => {
+          setSuccessModalOpen(false);
+          navigate("/menu management");
+        }, 1500);
+        
       } else {
         console.error("Failed to add menu:", response.statusText);
       }
@@ -290,6 +300,32 @@ const AddMenu = () => {
           </Button>
         </Dialog>
       </Box>
+
+      {successModalOpen && (
+        <Box
+          sx={{
+            position: "fixed",
+            top: "50%",
+            left: "50%",
+            transform: "translate(-50%, -50%)",
+            backgroundColor: "rgba(255, 255, 255, 0.8)",
+            padding: "1em",
+            borderRadius: "10px",
+            color:'green',
+            border:'solid 1px green'
+          }}
+        >
+          <Typography
+            variant="h3"
+            display="flex"
+            alignItems="center"
+            gap="0.5em"
+          >
+            <TaskAltIcon sx={{ fontSize: "1.5em" }} />
+            Successfully Added
+          </Typography>
+        </Box>
+      )}
     </>
   );
 };

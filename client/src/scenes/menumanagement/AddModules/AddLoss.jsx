@@ -15,6 +15,7 @@ import * as Yup from "yup";
 import { Header } from "components";
 import { Link, useNavigate } from "react-router-dom";
 import { baseUrl } from "state/api";
+import TaskAltIcon from "@mui/icons-material/TaskAlt";
 
 const AddLossSchema = Yup.object().shape({
   dateTime: Yup.date().required("Required"),
@@ -23,8 +24,14 @@ const AddLossSchema = Yup.object().shape({
   salesTarget: Yup.number().required("Required"),
   noSold: Yup.number().required("Required"),
   totalPrice: Yup.number().required("Required"),
-  lossQuantity: Yup.number().required("Required"),
-  lossPrice: Yup.number().required("Required"),
+  lossQuantity: Yup.number()
+    .positive("Loss quantity must not be a negative number")
+    .required("Required")
+    .test("is-not-zero", "Loss quantity cannot be zero", (value) => value > 0),
+  lossPrice: Yup.number()
+    .positive("Loss Price must not be a negative number")
+    .required("Required")
+    .test("is-not-zero", "Loss price cannot be zero", (value) => value > 0),
 });
 
 const AddLoss = () => {
@@ -32,6 +39,7 @@ const AddLoss = () => {
   const theme = useTheme();
   const [menuItems, setMenuItems] = useState([]);
   const [category, setCategory] = useState([]);
+  const [successModalOpen, setSuccessModalOpen] = useState(false);
   // eslint-disable-next-line
   const [selectedMenuItem, setSelectedMenuItem] = useState("");
 
@@ -60,9 +68,7 @@ const AddLoss = () => {
   useEffect(() => {
     const fetchMenuInventory = async () => {
       try {
-        const response = await fetch(
-          `${baseUrl}menumanagement/menuInventory`
-        );
+        const response = await fetch(`${baseUrl}menumanagement/menuInventory`);
         if (response.ok) {
           const data = await response.json();
           setMenuItems(data);
@@ -114,20 +120,21 @@ const AddLoss = () => {
 
   const handleSubmit = async (values) => {
     try {
-      const response = await fetch(
-        `${baseUrl}menumanagement/addLoss`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(values),
-        }
-      );
+      const response = await fetch(`${baseUrl}menumanagement/addLoss`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(values),
+      });
 
       if (response.ok) {
         console.log("Dishes Loss added successfully!");
-        navigate("/menu loss");
+        setSuccessModalOpen(true);
+        setTimeout(() => {
+          setSuccessModalOpen(false);
+          navigate("/menu loss");
+        }, 1500);
       } else {
         console.error("Failed to add dishes loss:", response.statusText);
       }
@@ -237,7 +244,11 @@ const AddLoss = () => {
                     </MenuItem>
                   ))}
                 </Field>
-                <Box display="flex" justifyContent="flex-end" paddingRight="10px">
+                <Box
+                  display="flex"
+                  justifyContent="flex-end"
+                  paddingRight="10px"
+                >
                   <Typography>Price: Php {values.price}</Typography>
                 </Box>
                 <Box display="flex" gap="1.5em">
@@ -286,9 +297,7 @@ const AddLoss = () => {
                     margin="normal"
                     InputProps={{
                       startAdornment: (
-                        <InputAdornment position="start">
-                          Php
-                        </InputAdornment>
+                        <InputAdornment position="start">Php</InputAdornment>
                       ),
                     }}
                     sx={{ background: theme.palette.primary[700] }}
@@ -307,9 +316,8 @@ const AddLoss = () => {
                     onChange={(e) => {
                       handleChange(e);
                       const newLossPrice =
-                        parseFloat(e.target.value) *
-                        parseFloat(values.price);
-                      setFieldValue("lossPrice", newLossPrice); 
+                        parseFloat(e.target.value) * parseFloat(values.price);
+                      setFieldValue("lossPrice", newLossPrice);
                     }}
                     value={values.lossQuantity}
                     as={TextField}
@@ -334,9 +342,7 @@ const AddLoss = () => {
                     margin="normal"
                     InputProps={{
                       startAdornment: (
-                        <InputAdornment position="start">
-                          Php
-                        </InputAdornment>
+                        <InputAdornment position="start">Php</InputAdornment>
                       ),
                     }}
                     sx={{ background: theme.palette.primary[700] }}
@@ -380,6 +386,32 @@ const AddLoss = () => {
           )}
         </Formik>
       </Box>
+
+      {successModalOpen && (
+        <Box
+          sx={{
+            position: "fixed",
+            top: "50%",
+            left: "50%",
+            transform: "translate(-50%, -50%)",
+            backgroundColor: "rgba(255, 255, 255, 0.8)",
+            padding: "1em",
+            borderRadius: "10px",
+            color:'green',
+            border:'solid 1px green'
+          }}
+        >
+          <Typography
+            variant="h3"
+            display="flex"
+            alignItems="center"
+            gap="0.5em"
+          >
+            <TaskAltIcon sx={{ fontSize: "1.5em" }} />
+            Successfully Added
+          </Typography>
+        </Box>
+      )}
     </>
   );
 };

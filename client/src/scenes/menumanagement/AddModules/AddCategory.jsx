@@ -9,6 +9,7 @@ import {
   Divider,
   InputLabel,
   TextField,
+  Typography,
   useTheme,
 } from "@mui/material";
 import { Formik, Field, Form } from "formik";
@@ -18,6 +19,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { baseUrl } from "state/api";
 import { DataGrid } from "@mui/x-data-grid";
 import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
+import TaskAltIcon from "@mui/icons-material/TaskAlt";
 
 const CategorySchema = Yup.object().shape({
   categoryName: Yup.string().required("Category Name is required"),
@@ -28,6 +30,7 @@ const AddPromo = () => {
   const [category, setCategory] = useState([]);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [selectedItemId, setSelectedItemId] = useState(null);
+  const [successModalOpen, setSuccessModalOpen] = useState(false);
   const theme = useTheme();
 
   const fetchCategory = async () => {
@@ -68,7 +71,11 @@ const AddPromo = () => {
 
       if (response.ok) {
         console.log("Category added successfully!");
-        navigate("/menu management");
+        setSuccessModalOpen(true);
+        setTimeout(() => {
+          setSuccessModalOpen(false);
+          navigate("/menu management");
+        }, 1500);
       } else {
         console.error("Failed to add category:", response.statusText);
       }
@@ -291,6 +298,32 @@ const AddPromo = () => {
           </Button>
         </DialogActions>
       </Dialog>
+
+      {successModalOpen && (
+        <Box
+          sx={{
+            position: "fixed",
+            top: "50%",
+            left: "50%",
+            transform: "translate(-50%, -50%)",
+            backgroundColor: "rgba(255, 255, 255, 0.8)",
+            padding: "1em",
+            borderRadius: "10px",
+            color:'green',
+            border:'solid 1px green'
+          }}
+        >
+          <Typography
+            variant="h3"
+            display="flex"
+            alignItems="center"
+            gap="0.5em"
+          >
+            <TaskAltIcon sx={{ fontSize: "1.5em" }} />
+            Successfully Added
+          </Typography>
+        </Box>
+      )}
     </>
   );
 };

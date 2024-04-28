@@ -12,6 +12,7 @@ import { Field, Formik, Form } from "formik";
 import React, { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { baseUrl } from "state/api";
+import TaskAltIcon from "@mui/icons-material/TaskAlt";
 import * as Yup from "yup";
 
 const AddEODSchema = Yup.object().shape({
@@ -27,6 +28,7 @@ const AddEOD = () => {
   const navigate = useNavigate();
   const date = new Date();
   const nextDay = new Date(date);
+  const [successModalOpen, setSuccessModalOpen] = useState(false);
   nextDay.setDate(nextDay.getDate());
 
   useEffect(() => {
@@ -95,7 +97,11 @@ const AddEOD = () => {
 
       if (response.ok) {
         console.log("EOD added successfully!");
-        navigate("/sales management");
+        setSuccessModalOpen(true);
+        setTimeout(() => {
+          setSuccessModalOpen(false);
+          navigate("/sales management");
+        }, 1500);
       } else {
         console.error("Failed to add eod:", response.statusText);
       }
@@ -305,6 +311,32 @@ const AddEOD = () => {
           </Form>
         )}
       </Formik>
+
+      {successModalOpen && (
+        <Box
+          sx={{
+            position: "fixed",
+            top: "50%",
+            left: "50%",
+            transform: "translate(-50%, -50%)",
+            backgroundColor: "rgba(255, 255, 255, 0.8)",
+            padding: "1em",
+            borderRadius: "10px",
+            color: "green",
+            border: "solid 1px green",
+          }}
+        >
+          <Typography
+            variant="h3"
+            display="flex"
+            alignItems="center"
+            gap="0.5em"
+          >
+            <TaskAltIcon sx={{ fontSize: "1.5em" }} />
+            Successfully Added
+          </Typography>
+        </Box>
+      )}
     </Box>
   );
 };

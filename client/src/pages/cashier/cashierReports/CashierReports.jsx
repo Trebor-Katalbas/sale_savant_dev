@@ -155,6 +155,7 @@ const CashierReports = () => {
           `Record with ID ${selectedItemId} deleted successfully`
         );
         fetchStartingCash();
+        window.location.reload();
       } else {
         console.error("Failed to delete record:", response.statusText);
       }

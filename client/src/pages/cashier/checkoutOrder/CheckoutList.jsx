@@ -43,7 +43,7 @@ const CheckoutList = () => {
       const response = await fetch(`${baseUrl}cashier/get-receipt`);
       if (response.ok) {
         const data = await response.json();
-        setReceipt(data);
+        setReceipt(data.reverse());
       } else {
         console.error("Failed to fetch receipt data:", response.statusText);
       }

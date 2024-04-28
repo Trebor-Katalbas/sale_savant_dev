@@ -131,7 +131,7 @@ const CustomCardComponent = ({ img, menuName, price, salesTarget, menuId }) => {
             <Typography variant="subtitle1">{`Php ${price}`}</Typography>
           </div>
 
-          <div style={{ display: "flex", flexDirection: "column", gap: "1em" }}>
+          <div style={{ display: "flex", flexDirection: "column", gap: "1em", zIndex: "2" }}>
               <Button
                 variant="contained"
                 sx={{background:'#fff', '&:hover': {background:theme.palette.primary[600]}}}
