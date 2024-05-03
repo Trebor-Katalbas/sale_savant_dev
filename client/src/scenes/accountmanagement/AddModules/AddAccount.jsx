@@ -22,7 +22,10 @@ import { baseUrl } from "state/api";
 const AddAccountSchema = Yup.object().shape({
   userName: Yup.string().required("Required"),
   role: Yup.string().required("Required"),
-  userNumber: Yup.number().required("Required"),
+  userNumber: Yup.number()
+    .positive("Please enter a valid number")
+    .integer("Please enter a valid number")
+    .required("Required"),
   password: Yup.string().required("Required"),
   confirmPassword: Yup.string()
     .required("Required")
@@ -112,6 +115,7 @@ const AddAccount = () => {
                       name="userName"
                       onBlur={handleBlur}
                       onChange={handleChange}
+                      placeholder="Enter your full name (First Name Last Name)"
                       value={values.userName}
                       as={TextField}
                       fullWidth
@@ -143,6 +147,7 @@ const AddAccount = () => {
                     >
                       <MenuItem value="Cashier">Cashier</MenuItem>
                       <MenuItem value="Manager">Manager</MenuItem>
+                      <MenuItem value="Kitchen">Kitchen</MenuItem>
                     </Field>
 
                     <InputLabel htmlFor="userNumber">Unique Number</InputLabel>

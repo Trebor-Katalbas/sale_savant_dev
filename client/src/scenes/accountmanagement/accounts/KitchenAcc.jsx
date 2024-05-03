@@ -21,7 +21,7 @@ import { Search } from "@mui/icons-material";
 import { DataGrid } from "@mui/x-data-grid";
 import { baseUrl } from "state/api";
 
-const ManagerAcc = () => {
+const KitchenAcc = () => {
   const theme = useTheme();
   const navigate = useNavigate();
   const [account, setAccount] = useState([]);
@@ -55,7 +55,7 @@ const ManagerAcc = () => {
   useEffect(() => {
     const filtered = account.filter(
       (acc) =>
-        acc.role === "Manager" &&
+        acc.role === "Kitchen" &&
         acc.userName.toLowerCase().includes(searchTerm.toLowerCase())
     );
     setFilteredAccount(filtered);
@@ -314,4 +314,4 @@ const ManagerAcc = () => {
   );
 };
 
-export default ManagerAcc;
+export default KitchenAcc;

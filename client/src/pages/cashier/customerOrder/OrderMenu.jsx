@@ -380,6 +380,7 @@ const OrderMenu = (props) => {
       tableNo: selectedTables.join(", "),
       orderNo: OrderNo,
       status: "Unpaid",
+      kitchenStatus: "Pending",
       subTotal: calculateTotalAmount().subTotal.toFixed(2),
       amountDiscounted: calculateTotalAmount().amountDiscounted.toFixed(2),
       totalAmount: calculateTotalAmount().total.toFixed(2),

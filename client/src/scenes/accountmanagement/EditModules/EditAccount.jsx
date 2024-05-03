@@ -166,6 +166,7 @@ const EditAccount = () => {
                     >
                       <MenuItem value="Cashier">Cashier</MenuItem>
                       <MenuItem value="Manager">Manager</MenuItem>
+                      <MenuItem value="Kitchen">Kitchen</MenuItem>
                     </Field>
 
                     <InputLabel htmlFor="userNumber">Unique Number</InputLabel>

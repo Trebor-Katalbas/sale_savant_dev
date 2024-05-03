@@ -290,6 +290,19 @@ const MenuManagement = () => {
             flexWrap: "wrap",
             gap: "1em",
             margin: "1.5em",
+            height: "calc(100vh - 260px)", 
+            overflowY: "auto", 
+            paddingRight: "16px",
+            "&::-webkit-scrollbar": {
+              width: "5px", 
+            },
+            "&::-webkit-scrollbar-track": {
+              background: "#b3d9ff", 
+            },
+            "&::-webkit-scrollbar-thumb": {
+              background: "#3498db", 
+              borderRadius: "6px",
+            },
           }}
         >
           {filteredMenuData.map((menu) => (

@@ -1,5 +1,5 @@
 import express from "express";
-import { createReceipt, AddTable, getOrderReceipt, getTable, updateTableStatus, deleteTable, deleteReceipt, AddOrderSale, getOrderSale, updateReceiptStatus, getOrderSaleNo, addRefund, getRefund } from "../controllers/cashierReceipt.js";
+import { createReceipt, AddTable, getOrderReceipt, getTable, updateTableStatus, deleteTable, deleteReceipt, AddOrderSale, getOrderSale, updateReceiptStatus, getOrderSaleNo, addRefund, getRefund, updateKitchenStatus } from "../controllers/cashierReceipt.js";
 
 const router = express.Router();
 
@@ -19,6 +19,7 @@ router.get("/get-refunds", getRefund)
 // Update
 router.put("/update-table-status", updateTableStatus)
 router.put("/update-receipt-status/:id", updateReceiptStatus)
+router.put("/update-kitchen-status/:id", updateKitchenStatus)
 
 // Delete
 router.delete("/delete-table/:id", deleteTable)

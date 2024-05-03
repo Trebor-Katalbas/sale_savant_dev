@@ -18,6 +18,7 @@ export const createReceipt = async (req, res) => {
       amountDiscounted,
       totalAmount,
       status,
+      kitchenStatus,
       promoUsed,
     } = req.body;
     let salesTargetDeducted = false;
@@ -75,6 +76,7 @@ export const createReceipt = async (req, res) => {
       amountDiscounted,
       totalAmount,
       status,
+      kitchenStatus,
       promoUsed,
     });
     const savedReceipt = await newReceipt.save();
@@ -252,6 +254,26 @@ export const updateReceiptStatus = async (req, res) => {
     const updatedReceipt = await Receipt.findByIdAndUpdate(
       id,
       { paymentType, paymentCode, status, items, totalAmount, subTotal, amountDiscounted },
+      { new: true }
+    );
+
+    if (!updatedReceipt) {
+      return res.status(404).json({ message: 'Receipt not found' });
+    }
+
+    res.status(200).json(updatedReceipt);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+export const updateKitchenStatus = async (req, res) => {
+  try {
+    const { id } = req.params; 
+    const { kitchenStatus } = req.body; 
+
+    const updatedReceipt = await Receipt.findByIdAndUpdate(
+      id,
+      { kitchenStatus },
       { new: true }
     );
 

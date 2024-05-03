@@ -68,7 +68,7 @@ const CashierReports = () => {
           ...item,
           id: index + 1,
         }));
-        setStartingCash(startingCashWithId);
+        setStartingCash(startingCashWithId.reverse());
       } else {
         console.error("Failed to fetch data:", response.statusText);
       }

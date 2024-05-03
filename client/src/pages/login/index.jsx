@@ -68,6 +68,8 @@ const Login = () => {
           navigate("/home");
         } else if (data.user.role === "Cashier") {
           navigate("/home-cashier");
+        } else if (data.user.role === "Kitchen") {
+          navigate("/kitchen");
         } else {
           console.error("Unknown role:", data.user.role);
         }

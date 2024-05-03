@@ -178,6 +178,18 @@ const CashierAcc = () => {
                   Cashier
                 </Button>
               </Link>
+
+              <Link to="/kitchen accounts">
+                <Button
+                  variant="contained"
+                  sx={{
+                    background: theme.palette.primary[400],
+                    fontSize: "1.2em",
+                  }}
+                >
+                  Kitchen
+                </Button>
+              </Link>
             </FlexBetween>
 
             <FlexBetween

@@ -61,6 +61,7 @@ function App() {
               <Route path="/account management" element={<scenes.AccountManagement/>} />
               <Route path="/void" element={<scenes.Void/>}/>
               <Route path="/manager accounts" element={<scenes.ManagerAcc/>} />
+              <Route path="/kitchen accounts" element={<scenes.KitchenAcc/>} />
               <Route path="/cashier accounts" element={<scenes.CashierAcc/>} />
               <Route path="/add account" element={<scenes.AddAccount/>} />
               <Route path={`/edit account/:id`} element={<scenes.EditAccount/>} />
@@ -95,6 +96,11 @@ function App() {
               <Route path="/cashier-reports" element={<pages.CashierReports />}/>
               <Route path="/add-startcash" element={<pages.AddStartCash /> } />
 
+            </Route>
+
+            {/* Kitchen Routes */}
+            <Route element={isAuth ? <pages.Kitchen/> : <Navigate to="/" />}>
+              <Route path="/kitchen" element={<pages.Kitchen/>}/>
             </Route>
 
           </Routes>

@@ -17,3 +17,6 @@ export {default as Refunds} from './cashier/refund/index.jsx'
 //Reports
 export {default as CashierReports} from './cashier/cashierReports/CashierReports.jsx'
 export {default as AddStartCash} from './cashier/cashierReports/AddStartCash.jsx'
+
+//Kitchen
+export {default as Kitchen} from './kitchen/Kitchen.jsx'

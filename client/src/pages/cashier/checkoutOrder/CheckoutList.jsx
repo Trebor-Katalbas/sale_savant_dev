@@ -2,8 +2,13 @@ import {
   Badge,
   Box,
   Button,
+  Container,
   Drawer,
+  FormControl,
   IconButton,
+  InputBase,
+  InputLabel,
+  Select,
   Typography,
   useMediaQuery,
   useTheme,
@@ -13,6 +18,8 @@ import React, { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { SaleSavantLogo } from "assets";
 import CircleIcon from "@mui/icons-material/Circle";
+import PendingActionsIcon from "@mui/icons-material/PendingActions";
+import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import NavigateBeforeIcon from "@mui/icons-material/NavigateBefore";
 import NavigateNextIcon from "@mui/icons-material/NavigateNext";
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
@@ -22,6 +29,7 @@ import Slider from "react-slick";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 import { baseUrl } from "state/api";
+import { Search } from "@mui/icons-material";
 
 const CheckoutList = () => {
   const theme = useTheme();
@@ -32,6 +40,7 @@ const CheckoutList = () => {
   const [selectedOrderId, setSelectedOrderId] = useState(null);
   const [selectedTable, setSelectedTable] = useState(null);
   const [isReceiptOpen, setIsReceiptOpen] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
   const playerRef = useRef(null);
 
   useEffect(() => {
@@ -91,6 +100,16 @@ const CheckoutList = () => {
       },
     ],
   };
+
+  const handleSearchChange = (e) => {
+    setSearchTerm(e.target.value);
+  };
+
+  const filteredReceipt = receipt.filter(
+    (item) =>
+      item.tableNo.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      item.orderNo.toString().includes(searchTerm)
+  );
 
   const isDesktop = useMediaQuery(theme.breakpoints.up("md"));
 
@@ -207,9 +226,64 @@ const CheckoutList = () => {
                   Checkout
                 </Button>
               </Badge>
-              <Button variant="contained" onClick={() => handleButtonClick("/refunds")}>Refunds</Button>
-              <Button variant="contained" onClick={() => handleButtonClick("/cashier-reports")}>Reports</Button>
+              <Button
+                variant="contained"
+                onClick={() => handleButtonClick("/refunds")}
+              >
+                Refunds
+              </Button>
+              <Button
+                variant="contained"
+                onClick={() => handleButtonClick("/cashier-reports")}
+              >
+                Reports
+              </Button>
             </div>
+
+            <Container>
+              <FlexBetween
+                backgroundColor={theme.palette.secondary[700]}
+                borderRadius="20px"
+                gap="1rem"
+                minWidth="300px"
+                p="0.3rem 1.5rem"
+              >
+                <InputBase
+                  placeholder="Search Name..."
+                  value={searchTerm}
+                  onChange={handleSearchChange}
+                />
+                <Search />
+              </FlexBetween>
+            </Container>
+
+            {/* <Box>
+              <FormControl color="secondary">
+                <InputLabel
+                  id="category-label"
+                  sx={{ color: theme.palette.primary[200] }}
+                >
+                  Category
+                </InputLabel>
+                <Select
+                  label="Category"
+                  value={selectedCategory}
+                  onChange={handleCategoryChange}
+                  sx={{
+                    width: "180px",
+                    border: theme.palette.secondary[300],
+                    color: theme.palette.primary[200],
+                  }}
+                >
+                  <MenuItem value="All">All</MenuItem>
+                  {category.map((cat) => (
+                    <MenuItem key={cat.id} value={cat.categoryName}>
+                      {cat.categoryName}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+            </Box> */}
 
             <Box sx={{ display: "flex", gap: "2em" }}>
               <Box
@@ -217,7 +291,7 @@ const CheckoutList = () => {
                   border: "black 1px solid",
                   borderRadius: "5px",
                   display: "flex",
-                  gap: "2em",
+                  gap: "1em",
                   padding: " 0.5em 1em",
                 }}
               >
@@ -229,8 +303,8 @@ const CheckoutList = () => {
                     gap: "0.2em",
                   }}
                 >
-                  <CircleIcon sx={{ color: "#8AF4BA", fontSize: "2.5em" }} />
-                  <Typography variant="h4"> Paid</Typography>
+                  <CircleIcon sx={{ color: "#8AF4BA", fontSize: "2em" }} />
+                  <Typography variant="h5"> Paid</Typography>
                 </div>
 
                 <div
@@ -241,8 +315,34 @@ const CheckoutList = () => {
                     gap: "0.2em",
                   }}
                 >
-                  <CircleIcon sx={{ color: "#F4CFCF", fontSize: "2.5em" }} />
-                  <Typography variant="h4"> Unpaid</Typography>
+                  <CircleIcon sx={{ color: "#F4CFCF", fontSize: "2em" }} />
+                  <Typography variant="h5"> Unpaid</Typography>
+                </div>
+
+                <div
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    gap: "0.2em",
+                  }}
+                >
+                  <PendingActionsIcon
+                    sx={{ color: "#FF5A5A", fontSize: "2em" }}
+                  />
+                  <Typography variant="h5"> Pending</Typography>
+                </div>
+
+                <div
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    gap: "0.2em",
+                  }}
+                >
+                  <CheckCircleIcon sx={{ color: "#00B453", fontSize: "2em" }} />
+                  <Typography variant="h5"> Served</Typography>
                 </div>
               </Box>
             </Box>
@@ -318,7 +418,7 @@ const CheckoutList = () => {
                 </>
               )}
               <Slider ref={sliderRef} {...settings}>
-                {receipt.map((item, index) => (
+                {filteredReceipt.map((item, index) => (
                   <TableOrder
                     key={index}
                     tableNo={item.tableNo}
@@ -326,6 +426,7 @@ const CheckoutList = () => {
                     orderType={item.orderType}
                     totalAmount={item.totalAmount}
                     status={item.status}
+                    kitchenStatus={item.kitchenStatus}
                     selectedId={selectedOrderId}
                     selectedTable={selectedTable}
                     onClick={() => {

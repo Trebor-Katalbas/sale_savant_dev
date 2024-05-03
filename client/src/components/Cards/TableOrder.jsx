@@ -11,6 +11,8 @@ import {
 import PointOfSaleIcon from "@mui/icons-material/PointOfSale";
 import PaymentsIcon from "@mui/icons-material/Payments";
 import ClassIcon from "@mui/icons-material/Class";
+import CheckCircleIcon from "@mui/icons-material/CheckCircle";
+import PendingActionsIcon from "@mui/icons-material/PendingActions";
 import React, { useEffect, useState } from "react";
 import { baseUrl } from "state/api";
 
@@ -19,6 +21,7 @@ const TableOrder = ({
   orderNo,
   orderType,
   totalAmount,
+  kitchenStatus,
   status,
   selectedId,
   selectedTable,
@@ -139,11 +142,24 @@ const TableOrder = ({
           cursor: "pointer",
         }}
       >
+        <Box sx={{ position: "absolute", top: 10, left: 10, zIndex: 5 }}>
+          {kitchenStatus === "Pending" ? 
+            <PendingActionsIcon sx={{ color: "#FF5A5A", fontSize: "3em" }} />
+           : 
+            <CheckCircleIcon sx={{ color: "#00B453", fontSize: "3em" }} />
+          }
+        </Box>
         <Button
           variant="outlined"
           color="success"
           onClick={handleClearTable}
-          sx={{ position: "absolute", top: 10, right: 10, zIndex: 5, display: status === "Unpaid" ? "none" : "block" }}
+          sx={{
+            position: "absolute",
+            top: 10,
+            right: 10,
+            zIndex: 5,
+            display: status === "Unpaid" ? "none" : "block",
+          }}
         >
           {tableNo === "Take-out" ? "Settle Receipt" : "Clear Table"}
         </Button>
